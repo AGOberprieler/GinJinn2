@@ -1,0 +1,70 @@
+project_dir: "."
+task: "instance-segmentation"
+# Input data options
+input:
+  type: "COCO"
+  training:
+    annotation_path: "annotations_xyz.json"
+    image_path: "images_xyz"
+# Model options
+model:
+  name: "mask_rcnn_R_50_FPN_3x"
+  weights: "pretrained"
+  model_parameters:
+    roi_heads:
+      batch_size_per_image: 256
+# Options for model training
+training:
+  learning_rate: 0.000125
+  batch_size: 1
+  max_iter: 100
+  eval_period: 50
+# Options for image augmentation
+augmentation:
+  - horizontal_flip:
+      probability: 0.25
+  - vertical_flip:
+      probability: 0.25
+  - rotation_range:
+      angle_min: -45
+      angle_max: 45
+      expand: True
+      probability: 0.2
+  - rotation_choice:
+      angles:
+        - -20
+        - -10
+        - 10
+        - 20
+      expand: False
+      probability: 0.2
+  - brightness:
+      brightness_min: 0.5
+      brightness_max: 1.5
+      probability: 0.9
+  - contrast:
+      contrast_min: 0.5
+      contrast_max: 1.5
+      probability: 0.9
+  - saturation:
+      saturation_min: 0.5
+      saturation_max: 1.5
+      probability: 0.9
+  - crop_relative:
+      width: 0.8
+      height: 0.8
+      probability: 0.5
+  - crop_absolute:
+      width: 128
+      height: 128
+      probability: 0.5
+
+# Additional options
+options:
+  n_threads: 10
+  resume: False
+# Detectron options
+detectron:
+  MODEL:
+    ROI_HEADS:
+      BATCH_SIZE_PER_IMAGE: 256

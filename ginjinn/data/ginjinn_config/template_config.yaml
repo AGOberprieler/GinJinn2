@@ -1,0 +1,41 @@
+project_dir: "ENTER PROJECT DIRECTORY"
+task: "ENTER TASK"
+# Input data options
+input:
+  type: "ENTER ANNOTATION TYPE"
+  training:
+    annotation_path: "ENTER TRAINING ANNOATION PATH"
+    image_path: "ENTER TRAINING IMAGES"
+  validation:
+    annotation_path: "ENTER VALIDATION ANNOATION PATH"
+    image_path: "ENTER VALIDATION IMAGES"
+  test:
+    annotation_path: "ENTER TEST ANNOATION PATH"
+    image_path: "ENTER TEST IMAGES"
+# Model options
+model:
+  name: "ENTER MODEL NAME"
+  weights: "pretrained"
+# Options for model training
+training:
+  learning_rate: 0.000125
+  batch_size: 1
+  max_iter: 40000
+# Options for image augmentation
+augmentation:
+  - brightness:
+      brightness_min: 0.5
+      brightness_max: 1.5
+      probability: 0.9
+  - contrast:
+      contrast_min: 0.5
+      contrast_max: 1.5
+      probability: 0.9
+  - saturation:
+      saturation_min: 0.5
+      saturation_max: 1.5
+      probability: 0.9
+
+# Additional options
+options:
+  n_threads: 1

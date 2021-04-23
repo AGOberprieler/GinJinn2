@@ -1,0 +1,56 @@
+project_dir: "ENTER PROJECT DIR HERE"
+task: "bbox-detection"
+# Input data options
+input:
+  type: "COCO" # or "PVOC"
+  training:
+    annotation_path: "ENTER ANNOTATION PATH HERE"
+    image_path: "ENTER IMAGE DIR HERE"
+  validation:
+    annotation_path: "ENTER ANNOTATION PATH HERE (OPTIONAL)"
+    image_path: "ENTER IMAGE DIR HERE (OPTIONAL)"
+  test:
+    annotation_path: "ENTER ANNOTATION PATH HERE (OPTIONAL)"
+    image_path: "ENTER IMAGE DIR HERE (OPTIONAL)"
+
+# Model options
+model:
+  name: "faster_rcnn_R_50_DC5_3x"
+  weights: "pretrained"
+
+# Options for model training
+training:
+  learning_rate: 0.00125
+  batch_size: 1
+  max_iter: 5000
+  eval_period: 250
+  checkpoint_period: 2500
+
+# Options for image augmentation
+augmentation:
+  - horizontal_flip:
+      probability: 0.25
+  - vertical_flip:
+      probability: 0.25
+  # - brightness:
+  #     brightness_min: 0.8
+  #     brightness_max: 1.2
+  #     probability: 0.25
+  # - contrast:
+  #     contrast_min: 0.8
+  #     contrast_max: 1.2
+  #     probability: 0.25
+  # - saturation:
+  #     saturation_min: 0.8
+  #     saturation_max: 1.2
+  #     probability: 0.25
+  # - rotation_range:
+  #     angle_min: -30
+  #     angle_max: 30
+  #     expand: True
+  #     probability: 0.25
+
+# Additional options
+options:
+  n_threads: 1
+  resume: True

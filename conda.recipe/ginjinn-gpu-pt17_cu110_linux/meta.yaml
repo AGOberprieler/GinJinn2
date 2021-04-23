@@ -1,0 +1,42 @@
+package:
+  name: ginjinn2
+  version: {{ environ.get('GIT_DESCRIBE_TAG', 'default').lstrip('v') }}
+
+source:
+
+  git_url: https://github.com/AGOberprieler/GinJinn2
+
+requirements:
+  build:
+    - python {{ python }}
+    - setuptools
+    - pytorch==1.7.0
+    - torchvision==0.8.0
+    - cudatoolkit=11.0
+    - pip
+
+  run:
+    - python {{ python }}
+    - pytorch==1.7.0
+    - torchvision==0.8.0
+    - cudatoolkit=11.0
+    - opencv
+    - scikit-image
+    - pandas
+    - pycocotools
+    - mock
+    - imantics
+    - scikit-learn
+
+build:
+  string: pt17_cu110_py{{ python | replace(".", "") }}{{ '_nightly' if environ.get('NIGHTLY') else '' }}
+  skip: true # [not linux]
+entry_points:
+   - ginjinn = ginjinn.commandline.main:main
+
+
+
+about:
+  home: https://github.com/AGOberprieler/GinJinn2
+  license: Apache-2.0
+  summary: An object detection framework for biologists.

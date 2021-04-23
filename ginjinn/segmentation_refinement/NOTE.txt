@@ -1,0 +1,3 @@
+Paths were adapted to fit the GinJinn architecture.
+
+segmentation_refinement was developed by Ho Kei Cheng, Jihoon Chung and only adapted for GinJinn. See LICENSE.
