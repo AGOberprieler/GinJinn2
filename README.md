@@ -8,7 +8,8 @@ Besides providing a convenient interface to the latter, GinJinn2 offers several 
 ## Installation
 ### Requirements
 - Linux Operating System (e.g. Debian, Ubuntu)
-- An NVidia GPU compatible with CUDA toolkit version >= 9.2 (compute capability >= 3; see https://developer.nvidia.com/cuda-gpus)
+- NVidia GPU compatible with CUDA toolkit version >= 9.2 (compute capability >= 3; see https://developer.nvidia.com/cuda-gpus)
+- NVidia GPU drivers installed (https://www.nvidia.com/en-us/drivers/unix/)
 
 ### Installation via Conda
 It is recommended to install GinJinn via [Conda](https://docs.conda.io/en/latest/), an open-source package management system for Python and R, which also includes facilities for environment management system. See the [official installation guide](https://conda.io/projects/conda/en/latest/user-guide/install/linux.html) for further information.
