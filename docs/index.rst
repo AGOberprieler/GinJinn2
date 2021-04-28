@@ -3,6 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. _index:
+
 Welcome to GinJinn2's documentation!
 ====================================
 
@@ -13,6 +15,7 @@ GinJinn2 provides a collection of command-line tools for bounding-box object det
    :caption: Contents:
 
    installation.rst
+   overview.rst
 
 .. Indices and tables
 .. ==================
