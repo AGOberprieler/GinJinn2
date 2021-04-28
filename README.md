@@ -1,4 +1,4 @@
-# GinJinn_development
+# GinJinn2
 
 ![GitHub](https://img.shields.io/github/license/agoberprieler/ginjinn_development)
 
@@ -19,9 +19,9 @@ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
-Once Conda ist installed run the following command to install GinJinn2:
+Once Conda ist installed run the following command to install GinJinn2 (insert your CUDA version):
 ```bash
-conda install -c agoberprieler -c conda-forge -c pytorch ginjinn2
+conda install -c agoberprieler -c conda-forge -c pytorch cudatoolkit=10.1 ginjinn2
 ```
 
 Test your installation using:
