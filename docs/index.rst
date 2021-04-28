@@ -6,15 +6,17 @@
 Welcome to GinJinn2's documentation!
 ====================================
 
+GinJinn2 provides a collection of command-line tools for bounding-box object detection and instance segmentation based on Detectron2. Besides providing a convenient interface to the latter, GinJinn2 offers several utility functions to facilitate building custom pipelines.
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   installation.rst
 
+.. Indices and tables
+.. ==================
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
