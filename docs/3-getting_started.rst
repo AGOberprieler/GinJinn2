@@ -44,6 +44,8 @@ Inside this folder, there is an "images" directory and an "annotations.json" fil
 The "images" folder contains the simulated images;
 "annotations.json" stores the corresponding instance-segmentation annotations in COCO format.
 
+You can use ``ginjinn info -a shapes_ds/annotations.json`` to display dataset statistics like the number of images and instances per category.
+
 **optional**: You can visualize annotations using the ``ginjinn utils vis`` command.
 The following command generates instance-segmentation visualizations (``-v segmentation``) for the simulated dataset (``-a shapes_ds/annotations.json``) in a new folder "shapes_ds_vis" (``-o shapes_ds_vis``).
 
@@ -82,3 +84,158 @@ Thus, when executing the following command, you will be asked, whether you want 
 After executing the above command, a new folder "shapes_ds_split" will be created, containing the three subfolders "train", "val", and "test".
 The subfolders will each contain a subset of the images and corresponding annotations of the whole dataset.
 
+
+2. GinJinn2 Project Initialization
+----------------------------------
+
+A GinJinn2 project is simply a folder containing a "ginjinn_config.yaml" file and an "outputs" folder.
+The "ginjinn_config.yaml" file describes the project configuration, including data, model, training and augmentation specifications.
+The "outputs" folder will contains intermediary outputs that are generated while the model is trained.
+Those include, for example, training and validation metrics, model checkpoints and `TensorBoard <https://www.tensorflow.org/tensorboard>`_-compatible outputs.
+
+The ``ginjinn new`` command takes care of initializing a new GinJinn2 project.
+``ginjinn new`` expects the name of a project directory to be generated, and optionally the path to a dataset folder (``-d``), and the name of a model template (``-t``).
+We will use ``ginjinn new`` to generate a new project "shapes_project" for instance segmentation with an Mask R-CNN (``-t mask_rcnn_R_50_FPN_1x.yaml``) using the split shapes dataset (``-d shapes_ds_split``).
+
+.. code-block:: bash
+
+    ginjinn new shapes_project -t mask_rcnn_R_50_FPN_1x.yaml -d shapes_ds_split/
+
+After running the above command, there will a new folder "shapes_project". This folder contains the configuration file "ginjinn_config.yaml" and the empty "ouputs" folder.
+
+
+3. GinJinn2 Project Configuration
+---------------------------------
+
+In this section, we will only very briefly touch the project configuration options, for a more in-depth discussion of the possible options please refer to the project configuration document.
+
+When opening the "ginjinn_config.yaml" file with a text editor (we recommend one with syntax highlighting for YAML files, e.g. `VSCode <https://code.visualstudio.com/>`_), you can see that that the ``input`` section is already filled with the paths to the "shapes_ds_split" datasets, and the ``model`` is set to "mask_rcnn_R_50_FPN_1x".
+For this demonstration, we will only modify some training options:
+
+* ``max_iter``: total number of training steps
+* ``eval_period``: number of steps between validation data set evaluations
+* ``checkpoint_period``: number of steps between saving model checkpoints
+
+We will set those values to ``max_iter: 1000``, ``eval_period: 100``, ``checkpoint_period: 500``.
+The ``training`` section of your "ginjinn_config.yaml" should now look like this:
+
+.. code-block:: YAML
+
+    training:
+        learning_rate: 0.00125
+        batch_size: 1
+        max_iter: 1000
+        eval_period: 100
+        checkpoint_period: 500
+
+The GinJinn2 project is now ready for training.
+
+4. Model Training
+-----------------
+
+The model can now be trained by simply running ``ginjinn train`` with the corresponding GinJinn2 project directory.
+For our "shapes_project" that is
+
+.. code-block:: bash
+
+    ginjinn train shapes_project
+
+After calling the above command, you will see commandline output describing the model, dataset, and a little bit later the training progress and the evaluation of the validation dataset.
+Additionally, the outputs folder will start becoming populated by several files.
+
+"metrics.pdf", "metrics.json", and "events.out.*" are probably the most informative files while the model is training.
+"metrics.pdf" contains plots of several performance metrics considering the training and validation datasets.
+"metrics.json" contains the same information JSON format.
+"events.out.*" is a file that can be read by the `TensorBoard <https://www.tensorflow.org/tensorboard>`_ application for a similar purpose.
+Here is an example how "metrics.pdf" might look like after training:
+
+.. image:: images/shapes_project_metrics_0.png
+    :alt: Shapes Project Metrics Page 1
+
+After training, the "model_final.pth" file contains the final model weights, i.e. the trained model.
+Additionally, there are model checkpoint files, identified by the "model\_" prefix and ".pth" suffix, storing the model state at certain numbers of training iterations.
+
+
+5. Model Evaluation
+-------------------
+
+Once the model is trained, it can be evaluated using the test dataset.
+For this purpose, GinJinn2 provides the ``ginjinn evaluate`` command.
+We evaluate our shape detection model using:
+
+.. code-block:: bash
+
+    ginjinn evaluate shapes_project
+
+This will output the evaluation metrics to the console and write an "evaluation.csv" file to the project directory.
+Finally, you should compare the evaluation metrics of the validation set (see "metrics.pdf" or "metrics.json") with those of test set to check for overfitting.
+In the case of out shapes_project, "segm/AP" in the last line of "metrics.json" should be around 90;
+the same should be the case for the "segm"-"AP" entry in "evaluation.csv".
+
+For our shapes project everything should look fine and we can start applying the trained model to new data.
+
+
+6. Model Application
+--------------------
+
+A model can be applied using the ``ginjinn predict`` command.
+This command requires a GinJinn2 project with a trained model and a folder containing images (``-i``) to apply the model to.
+By default, the predictions are written to the folder "predictions" within the project directory;
+another output folder can be used by setting the ``-o`` option.
+
+Let's predict instance-segmentations for the shapes test dataset.
+The ``-s`` option allows to control which kind of prediction output should be generated.
+By default, a COCO annotation (JSON) file containing the segmentation and/or bounding-box predictions will be generated.
+For this example application, we will activate the visualization (``-s visualization``) and cropped (``-s cropped``) output options.
+
+The following command predicts the instance-segmentation for the test dataset and writes outputs to "shapes_prediction".
+
+.. code-block:: bash
+
+    ginjinn predict \
+        shapes_project \
+        -i shapes_ds_split/test/images/ \
+        -o shapes_prediction \
+        -s COCO \
+        -s cropped \
+        -s visualization
+
+The predictions in visualization and cropped format will look similar to this:
+
+.. image:: images/shapes_project_prediction_vis_crop_0.png
+    :alt: Visualization and cropped outputs
+    :width: 300
+    :align: center
+
+
+
+Real Data
+^^^^^^^^^
+
+Of course, we can not only predict on images from the test dataset, but on any kind of image.
+Here is an example with an input image of shapes drawn on a whiteboard, captured with a smartphone camera:
+
+.. image:: images/shapes_project_prediction_0.png
+    :alt: Prediction on custom data
+
+The command to generate the above predication was
+
+.. code-block:: bash
+
+    ginjinn predict \
+        shapes_project \
+        -i test_images/ \
+        -o test_images_pred \
+        -s COCO \
+        -s cropped \
+        -s visualization \
+        -r
+
+
+Conclusion
+----------
+
+We have applied GinJinn2 for instance-segmentation of simulated data.
+If you want to see how GinJinn2 can be used for object detection and instance segmentation with empirical data, have a look at the :doc:`Empirical Applications <4-empirical_applications>` document.
+
+For information on GinJinn2 project configurations see :doc:`Project Configuration <5-project_configuration>`.
