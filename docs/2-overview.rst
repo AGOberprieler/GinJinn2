@@ -1,9 +1,9 @@
-.. _overview:
+.. _2-overview:
 
 Overview
 ========
 
-After installation (:doc:`install instructions <installation>`), all GinJinn2 functionality can be accessed using the ``ginjinn`` commandline application.
+After installation (:doc:`install instructions <1-installation>`), all GinJinn2 functionality can be accessed using the ``ginjinn`` commandline application.
 
 Help
 ----
