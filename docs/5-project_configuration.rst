@@ -238,38 +238,390 @@ Example:
     warmup_iter: 1000
 
 
-.. ``momentum``
-.. ^^^^^^^^^^^^^^^
+``momentum``
+^^^^^^^^^^^^^^^
 
-.. Momentum parameter for the Stochastic Gradient Descent
+Momentum parameter for the Stochastic Gradient Descent optimizer.
+Typically, this value does not need to be changed.
 
 ``model`` Configuration
 -----------------------
+
+This entry comprises all configuration related to the model to be fit.
+
+Example:
+
+.. code-block:: YAML
+
+    model:
+        name: "faster_rcnn_R_50_FPN_1x"
+        ...
+
+``name``
+^^^^^^^^
+
+Name of the model to be fit.
+For a collection of possible model names see ``ginjinn new -h``.
+If the project is initialized using ``ginjinn new`` with the ``-t`` option, the name will be already set.
+
+Example:
+
+.. code-block:: YAML
+
+    name: "faster_rcnn_R_50_FPN_1x"
+
+
+``weights``
+^^^^^^^^^^^
+
+Weights to use for initalization.
+
+One of
+    - ``""``, meaning random initialization
+    - ``"pretrained"``, meaning pretrained weights ("Transfer Learning")
+    - path to a weights file (".pth") to be used for initalization
+
+Example:
+
+.. code-block:: YAML
+
+    weights: "pretrained"
+
+
+``model_parameters``
+^^^^^^^^^^^^^^^^^^^^
+
+Additional model-specific parameters.
+
+``anchor_generator``
+""""""""""""""""""""
+
+Anchor generator options.
+Modifying the anchor sizes and aspect ratios to match the expected objects might increase model performance.
+
+Relevant for: ``faster_rcnn_*``, ``mask_rcnn_*``
+
+Entries:
+    - ``sizes``: anchor sizes
+    - ``anspect_ratios``: anchor aspect ratios
+    - ``angles``: anchor rotation angles
+
+Example:
+
+.. code-block:: YAML
+
+    anchor_generator:
+        sizes:
+            - - 32
+            - - 64
+        aspect_ratios:
+            - - 0.5
+              - 1.0
+
+
+``rpn``
+"""""""
+
+Region Proposal Network options.
+
+Relevant for: ``faster_rcnn_*``, ``mask_rcnn_*``
+
+Entries:
+    - ``iou_thresholds``: intersection over Union thresholds
+    - ``batch_size_per_image``: number of region proposals per image
+
+Example:
+
+.. code-block:: YAML
+
+    rpn:
+        iou_thresholds:
+            - 0.3
+            - 0.7
+        batch_size_per_image: 256
+
+
+``roi_heads``
+"""""""""""""
+
+Region of Interest Heads options.
+
+Relevant for: ``faster_rcnn_*``, ``mask_rcnn_*``
+
+Entries:
+    - ``iou_thresholds``: intersection over Union thresholds
+    - ``batch_size_per_image``: number of interests per image
+
+Example:
+
+.. code-block:: YAML
+
+    roi_heads:
+        iou_thresholds:
+            - 0.5
+    batch_size_per_image: 512
 
 
 ``augmentation`` Configuration
 ------------------------------
 
+This entry comprises an arbitrary number of data augmentation configurations.
+Adding sensible data augmentation can artifically increase the available training data and thus improve model performance on new data ("Generalization").
+
+Example:
+
+.. code-block:: YAML
+
+    augmentations:
+        - horizontal_flip:
+            probability: 0.25
+        - vertical_flip:
+            probability: 0.25
+        ...
+
+``horizontal_flip``
+^^^^^^^^^^^^^^^^^^^
+
+Randomly apply a horizontal flip to images before training.
+
+Entries:
+    - ``probability``: probability of applying the augmentation
+
+Example:
+
+.. code-block:: YAML
+
+    horizontal_flip:
+        probability: 0.25
+
+``vertical_flip``
+^^^^^^^^^^^^^^^^^
+
+Randomly apply a vertical flip to images before training.
+
+Entries:
+    - ``probability``: probability of applying the augmentation
+
+Example:
+
+.. code-block:: YAML
+
+    vertical_flip:
+        probability: 0.25
+
+
+``brightness``
+^^^^^^^^^^^^^^
+
+Randomly apply a brightness augmentation to images before training.
+
+Entries:
+    - ``probability``: probability of applying the augmentation
+    - ``brightness_min``: minimum relative brightness 
+    - ``brightness_max``: maximum relative brightness
+
+Example:
+
+.. code-block:: YAML
+
+    brightness:
+        probability: 0.25
+        brightness_min: 0.8
+        brightness_max: 1.2
+
+
+``contrast``
+^^^^^^^^^^^^
+
+Randomly apply a contrast augmentation to images before training.
+
+Entries:
+    - ``probability``: probability of applying the augmentation
+    - ``contrast_min``: minimum relative contrast 
+    - ``contrast_max``: maximum relative contrast
+
+Example:
+
+.. code-block:: YAML
+
+    contrast:
+        probability: 0.25
+        contrast_min: 0.8
+        contrast_max: 1.2
+
+
+``saturation``
+^^^^^^^^^^^^^^
+
+Randomly apply a saturation augmentation to images before training.
+
+Entries:
+    - ``probability``: probability of applying the augmentation
+    - ``saturation_min``: minimum relative saturation 
+    - ``saturation_max``: maximum relative saturation
+
+Example:
+
+.. code-block:: YAML
+
+    saturation:
+        probability: 0.25
+        saturation_min: 0.8
+        saturation_max: 1.2
+
+
+``rotation_range``
+^^^^^^^^^^^^^^^^^^
+
+Randomly apply a rotation augmentation in the specified range to images before training.
+
+Entries:
+    - ``probability``: probability of applying the augmentation
+    - ``expand``: whether the image should be resized to fit the rotated image. If ``false``, the image will be cropped.
+    - ``angle_min``: minimum rotation angle
+    - ``angle_max``: maximum rotation angle
+
+Example:
+
+.. code-block:: YAML
+
+    rotation_range:
+        probability: 0.25
+        expand: true
+        angle_min: -30
+        angle_max: 30
+
+
+``rotation_choice``
+^^^^^^^^^^^^^^^^^^^
+
+Randomly apply a rotation augmentation with one of the specified angles to images before training.
+
+Entries:
+    - ``probability``: probability of applying the augmentation
+    - ``expand``: whether the image should be resized to fit the rotated image. If ``false``, the image will be cropped.
+    - ``angles``: rotation angles
+
+Example:
+
+.. code-block:: YAML
+
+    rotation_choice:
+        probability: 0.25
+        expand: true
+        angles:
+            - -45
+            - -30
+            - 30
+            - 45
+
+
+``crop_relative``
+^^^^^^^^^^^^^^^^^
+
+Randomly use a relative crop of the original image for training.
+
+Entries:
+    - ``probability``: probability of applying the augmentation
+    - ``width``: relative width of the crop
+    - ``height``: relative height of the crop
+
+Example:
+
+.. code-block:: YAML
+
+    crop_relative:
+        probability: 0.25
+        width: 0.8
+        height: 0.7
+
+
+``crop_absolute``
+^^^^^^^^^^^^^^^^^
+
+Randomly use a crop of the original image for training.
+
+Entries:
+    - ``probability``: probability of applying the augmentation
+    - ``width``: width of the crop in pixel
+    - ``height``: height of the crop in pixel
+
+Example:
+
+.. code-block:: YAML
+
+    crop_absolute:
+        probability: 0.25
+        width: 512
+        height: 512
 
 ``options`` Configuration
 -------------------------
+Additional options.
+
+Example:
+
+.. code-block:: YAML
+
+    options:
+        n_threads: 4
+        resume: false
+        device: "cuda:0"
+
+``n_threads``
+^^^^^^^^^^^^^
+
+Number of threads ("cores") to use for data loading and augmentation.
+
+Example:
+
+.. code-block:: YAML
+
+    n_threads: 2
 
 
-Bounding-Box Detection Models
------------------------------
-
-Faster R-CNN
-^^^^^^^^^^^^
-
-
-
-Instance Segmentation Models
-----------------------------
-
-Mask R-CNN
+``resume``
 ^^^^^^^^^^
 
+Whether to resume training or start fresh when calling ``ginjinn train`` for a GinJinn2 project that was already trained.
 
-Detectron2 Configuration
-------------------------
+Example:
 
+.. code-block:: YAML
+
+    resume: false
+
+``device``
+^^^^^^^^^^
+
+Computation device to use for model training.
+It is only sensible to change this if you are working on a multi-GPU system.
+
+Example:
+
+.. code-block:: YAML
+
+    device: "cuda:0"
+
+
+``detectron`` Configuration
+---------------------------
+
+Additional options that are directly converted to `Detectron2 <https://github.com/facebookresearch/detectron2>`_ configurations.
+This entry opens up advanced model configurations that are not directly supported by GinJinn2.
+
+For example
+
+.. code-block:: YAML
+
+    detectron:
+        SOLVER:
+            WARMUP_ITERS: 1000
+
+is equivalent to the Detectron2 configuration
+
+.. code-block:: Python
+
+    _C.SOLVER.WARMUP_ITERS = 1000
+
+See `Detectron2's default configs <https://github.com/facebookresearch/detectron2/blob/master/detectron2/config/defaults.py>`_.
