@@ -359,7 +359,7 @@ Example:
     roi_heads:
         iou_thresholds:
             - 0.5
-    batch_size_per_image: 512
+        batch_size_per_image: 512
 
 
 ``augmentation`` Configuration
