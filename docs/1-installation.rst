@@ -12,7 +12,7 @@ Requirements
 Installation via Conda
 ----------------------
 
-The recommonded way to install GinJinn2 is via Conda, an open-source package management system for Python and R, which also includes facilities for environment management. See the `official installation guide <https://conda.io/projects/conda/en/latest/user-guide/install/linux.html>`_ for further information.
+The recommended way to install GinJinn2 is via Conda, an open-source package management system for Python and R, which also includes facilities for environment management. See the `official installation guide <https://conda.io/projects/conda/en/latest/user-guide/install/linux.html>`_ for further information.
 
 To install Conda, run the following commands in your Linux terminal:
 
