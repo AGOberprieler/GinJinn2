@@ -56,7 +56,12 @@ The following command generates instance-segmentation visualizations (``-v segme
         -o shapes_ds_vis \
         -v segmentation
 
-Since we now have an annotated dataset, we can get started with the GinJinn2 workflow.
+The visualization of the simulated data will look similar to this:
+
+.. image:: images/shapes_example.jpg
+    :alt: Exemplary shapes simulation visualization
+
+Now that have an annotated dataset, we can get started with the GinJinn2 workflow.
 
 1. Train-Validation-Test Split
 ------------------------------
