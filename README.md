@@ -1,12 +1,21 @@
-# GinJinn_development
+# GinJinn2
 
 ![GitHub](https://img.shields.io/github/license/agoberprieler/ginjinn_development)
+[![Documentation Status](https://readthedocs.org/projects/ginjinn2/badge/?version=latest)](https://ginjinn2.readthedocs.io/en/latest/?badge=latest)
 
 GinJinn2 provides a collection of command-line tools for bounding-box object detection and instance segmentation based on [Detectron2](https://github.com/facebookresearch/detectron2).
 Besides providing a convenient interface to the latter, GinJinn2 offers several utility functions to facilitate building custom pipelines.
 
+## Documentation
+
+See out Read the Docs [Documentation](https://ginjinn2.readthedocs.io/en/latest/).
+
 ## Installation
 ### Requirements
+- Linux Operating System (e.g. Debian, Ubuntu)
+- NVidia GPU compatible with CUDA toolkit version >= 9.2 (compute capability >= 3; see https://developer.nvidia.com/cuda-gpus)
+- NVidia GPU driver installed (https://www.nvidia.com/en-us/drivers/unix/)
+
 ### Installation via Conda
 It is recommended to install GinJinn via [Conda](https://docs.conda.io/en/latest/), an open-source package management system for Python and R, which also includes facilities for environment management system. See the [official installation guide](https://conda.io/projects/conda/en/latest/user-guide/install/linux.html) for further information.
 
@@ -14,6 +23,16 @@ To install Conda, run the following commands in your Linux terminal:
 ```bash
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
+```
+
+Once Conda ist installed run the following command to install GinJinn2 (insert your CUDA version):
+```bash
+conda install -c agoberprieler -c conda-forge -c pytorch cudatoolkit=10.1 ginjinn2
+```
+
+Test your installation using:
+```bash
+ginjinn -h
 ```
 
 ## Usage
