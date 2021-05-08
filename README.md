@@ -52,7 +52,7 @@ The help pages briefly describe basic functionality and command-specific argumen
 
 A (labeled) input dataset should consist of a single image directory containing JPG images at its top level and accompanying annotations. GinJinn2 supports two common annotation formats, [COCO's data format](https://cocodataset.org/#format-data) (one JSON file per dataset), which is also used as output format, and XML files as used by [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/) (one file per image). The latter, however, is only supported for bounding-box object detection.
 
-Although not mandatory, it is recommended to place image directory and annotations in a common directory to enable more compact command invocations. If datasets are structured as shown below, the user does not have specify the image directory explicitely. Note that the file names are arbitrarily chosen.
+Although not mandatory, it is recommended to place image directory and annotations in a common directory to enable more compact command invocations. If datasets are structured as shown below, the user does not have to specify the image directory explicitly. Note that the file names are arbitrarily chosen.
 
 - COCO
 
