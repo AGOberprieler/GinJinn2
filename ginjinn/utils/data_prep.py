@@ -60,9 +60,10 @@ def flatten_coco(
 
     for i, img_ann in enumerate(annotations['images']):
         file_name = img_ann['file_name']
+        ext = os.path.splitext(file_name)[0]
 
         if custom_id:
-            new_file_name = f'{i}.jpg'
+            new_file_name = f'{i}{ext}'
             id_map[i] = file_name
         else:
             new_file_name = file_name.replace('/', sep)
