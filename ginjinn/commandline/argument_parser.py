@@ -858,15 +858,15 @@ def _setup_utils_parser(subparsers):
         default='~',
     )
     flatten_optional.add_argument(
-        '-c', '--custom_id',
-        dest = 'custom_id',
+        '-u', '--unique_id',
+        dest = 'unique_id',
         action = 'store_true',
         help = '''
-            Replace image file names with a custom id. An ID mapping file
+            Replace image file names with a unique id. An ID mapping file
             will be written if this option is set.
         '''
     )
-    parser.set_defaults(custom_id = False)
+    parser.set_defaults(unique_id = False)
 
     flatten_optional.add_argument(
         '-x', '--annotated_only',

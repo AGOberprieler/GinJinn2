@@ -18,7 +18,7 @@ def flatten_coco(
     img_root_dir: str,
     out_dir: str,
     sep: str = '~',
-    custom_id: bool = False,
+    unique_id: bool = False,
     annotated_only: bool = False,
     link_images: bool = True
 ):
@@ -38,8 +38,8 @@ def flatten_coco(
         Output directory.
     sep : str, optional
         Seperator for path flattening, by default '~'
-    custom_id : bool, optional
-        Whether the new image name should be replaced with a custom id, by default False
+    unique_id : bool, optional
+        Whether the new image name should be replaced with a unique id, by default False
     annotated_only : bool, optional
         Whether only annotated images should be kept in the data set.
     link_images : bool, optional
@@ -62,7 +62,7 @@ def flatten_coco(
         file_name = img_ann['file_name']
         ext = os.path.splitext(file_name)[0]
 
-        if custom_id:
+        if unique_id:
             new_file_name = f'{i}{ext}'
             id_map[i] = file_name
         else:
@@ -84,7 +84,71 @@ def flatten_coco(
     with open(out_ann_file, 'w') as ann_f:
         json.dump(annotations, ann_f, indent=2)
 
-    if custom_id:
+    if unique_id:
+        id_map_file = os.path.join(out_dir, 'id_map.csv')
+        id_map_df = pd.DataFrame.from_records(
+            list(id_map.items()),
+            columns=['id', 'original_path']
+        )
+        id_map_df.to_csv(id_map_file, index=False)
+
+
+def flatten_img_dir(
+    img_root_dir: str,
+    out_dir: str,
+    sep: str = '~',
+    unique_id: bool = False,
+    link_images: bool = True
+):
+    '''flatten_img_dir
+    Flatten a nested image directory.
+
+    Parameters
+    ----------
+    img_root_dir : str
+        Root dir of the image directory. For COCO, this directory is often called
+        "images".
+    out_dir : str
+        Output directory.
+    sep : str, optional
+        Seperator for path flattening, by default '~'
+    unique_id : bool, optional
+        Whether the new image name should be replaced with a unique id, by default False
+    link_images : bool, optional
+        If true, images won't be copied but hard-linked instead.
+    '''
+    out_img_dir = os.path.join(out_dir, 'images')
+    if not os.path.exists(out_img_dir):
+        os.makedirs(out_img_dir)
+
+    id_map = {}
+    i_img = 0
+
+    for path in glob.iglob(os.path.join(img_root_dir, "**", "*"), recursive=True):
+        ext = os.path.splitext(path)[1]
+        if ext not in (".jpg", ".jpeg", ".JPG", ".JPEG"):
+            continue
+
+        if unique_id:
+            new_file_name = f'{i_img}{ext}'
+            id_map[i_img] = path
+        else:
+            new_file_name = path.replace('/', sep)
+
+        if link_images:
+            os.link(
+                os.path.join(path),
+                os.path.join(out_img_dir, new_file_name)
+            )
+        else:
+            shutil.copy(
+                os.path.join(path),
+                os.path.join(out_img_dir, new_file_name)
+            )
+
+        i_img += 1
+
+    if unique_id:
         id_map_file = os.path.join(out_dir, 'id_map.csv')
         id_map_df = pd.DataFrame.from_records(
             list(id_map.items()),

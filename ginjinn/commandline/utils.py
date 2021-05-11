@@ -138,7 +138,7 @@ def utils_flatten(args):
     image_root_dir = args.image_root_dir
     ann_path = args.ann_path
     sep = args.seperator
-    custom_id = args.custom_id
+    unique_id = args.unique_id
     annotated_only = args.annotated_only
 
     if os.path.exists(out_dir):
@@ -157,7 +157,7 @@ def utils_flatten(args):
         img_root_dir=image_root_dir,
         out_dir=out_dir,
         sep=sep,
-        custom_id=custom_id,
+        unique_id=unique_id,
         annotated_only=annotated_only,
     )
 
