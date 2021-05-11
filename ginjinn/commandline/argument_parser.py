@@ -850,10 +850,10 @@ def _setup_utils_parser(subparsers):
     # optional
     flatten_optional = flatten_parser.add_argument_group('optional arguments')
     flatten_optional.add_argument(
-        '-s', '--seperator',
+        '-s', '--separator',
         type = str,
         help = '''
-            Seperator for the image path flattening.
+            Separator for the image path flattening.
         ''',
         default='~',
     )
@@ -877,6 +877,61 @@ def _setup_utils_parser(subparsers):
         '''
     )
     parser.set_defaults(annotated_only = False)
+
+    # == flatten_img_dir
+    flatten_img_dir_parser = utils_parsers.add_parser(
+        'flatten_img_dir',
+        help = '''
+            Flatten image directory.
+        ''',
+        description = '''
+            Flatten image directory.
+        ''',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    # required
+    flatten_img_dir_required = flatten_img_dir_parser.add_argument_group('required arguments')
+
+    flatten_img_dir_required.add_argument(
+        '-o', '--out_dir',
+        type = str,
+        help = '''
+            Path to directory, which the images should be linked to.
+        ''',
+        required=True,
+    )
+
+    flatten_img_dir_required.add_argument(
+        '-i', '--image_root_dir',
+        type = str,
+        help = '''
+            Path to image directory root.
+        ''',
+        required=True,
+    )
+
+    # optional
+    flatten_img_dir_optional = flatten_img_dir_parser.add_argument_group('optional arguments')
+    flatten_img_dir_optional.add_argument(
+        '-s', '--separator',
+        type = str,
+        help = '''
+            Separator for the image path flattening.
+        ''',
+        default='~',
+    )
+    flatten_img_dir_optional.add_argument(
+        '-u', '--unique_id',
+        dest = 'unique_id',
+        action = 'store_true',
+        help = '''
+            Replace image file names with a unique id. An ID mapping file
+            will be written if this option is set.
+        '''
+    )
+    parser.set_defaults(unique_id = False)
+
 
     # == crop
     crop_parser = utils_parsers.add_parser(

@@ -126,7 +126,7 @@ def flatten_img_dir(
 
     for path in glob.iglob(os.path.join(img_root_dir, "**", "*"), recursive=True):
         ext = os.path.splitext(path)[1]
-        if ext not in (".jpg", ".jpeg", ".JPG", ".JPEG"):
+        if ext not in ('.jpg', '.jpeg', '.JPG', '.JPEG', '.png', '.PNG'):
             continue
 
         if unique_id:
