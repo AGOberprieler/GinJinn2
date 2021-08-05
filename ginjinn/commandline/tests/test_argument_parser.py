@@ -6,7 +6,7 @@ from ginjinn.commandline import GinjinnArgumentParser
 def test_simple_():
     # new
     p = GinjinnArgumentParser()
-    args = p.parse_args(['new', 'my_project_dir'])
+    args = p.parse_args(['new', 'my_project_dir', '-t', 'faster_rcnn_R_50_FPN_3x.yaml'])
 
     # train
     args = p.parse_args(['train', 'my_project_dir'])
