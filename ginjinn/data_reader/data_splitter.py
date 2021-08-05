@@ -328,7 +328,7 @@ def propose_split(
     class_names: List[str],
     p_val: Union[int, float],
     p_test: Union[int, float],
-) -> "(pd.DataFrame, dict)":
+) -> Tuple[pd.DataFrame, dict]:
     '''propose_split
 
     Propose a split based on class_counts and p_val, p_test.

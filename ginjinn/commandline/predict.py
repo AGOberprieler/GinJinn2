@@ -89,7 +89,7 @@ def ginjinn_predict(args):
     threshold = args.threshold
     padding = args.padding
     seg_refinement = args.seg_refinement
-    refinement_method = args.refinement_method
+    refinement_mode = args.refinement_mode
     device = args.device
 
     output_options = args.output_types
@@ -108,7 +108,7 @@ def ginjinn_predict(args):
         padding=padding,
         seg_refinement=seg_refinement,
         refinement_device=device,
-        refinement_method=refinement_method,
+        refinement_method=refinement_mode,
         threshold=threshold,
     )
 

@@ -91,7 +91,7 @@ def ginjinn_split(args):
     from ginjinn.utils.utils import get_anntype, find_img_dir, ImageDirNotFound
 
     ann_path = args.annotation_path
-    img_dir = args.image_dir
+    img_dir = args.img_dir
     split_dir = args.output_dir
     task = args.task
     ann_type = args.ann_type
@@ -110,8 +110,8 @@ def ginjinn_split(args):
     if ann_type == 'auto':
         ann_type = get_anntype(ann_path)
 
-    p_val = args.validation_fraction
-    p_test = args.test_fraction
+    p_val = args.validation_proportion
+    p_test = args.test_proportion
 
     if create_split_2(
         ann_path=ann_path,

@@ -43,8 +43,8 @@ def ginjinn_utils(args):
         utils_sw_split(args)
     elif args.utils_subcommand == 'sw_merge':
         utils_sw_merge(args)
-    elif args.utils_subcommand == 'filter':
-        utils_filter(args)
+    elif args.utils_subcommand == 'filter_cat':
+        utils_filter_cat(args)
     elif args.utils_subcommand == 'filter_size':
         utils_filter_size(args)
     elif args.utils_subcommand in ['visualize', 'vis']:
@@ -644,16 +644,16 @@ def utils_sw_merge(args):
     msg = f'Merging results written to {args.out_dir}.'
     print(msg)
 
-def utils_filter(args):
-    '''utils_filter
+def utils_filter_cat(args):
+    '''utils_filter_cat
 
-    GinJinn utils filter command.
+    GinJinn utils filter_cat command.
 
     Parameters
     ----------
     args
         Parsed GinJinn commandline arguments for the ginjinn utils
-        filter subcommand.
+        filter_cat subcommand.
     '''
 
     from ginjinn.utils.data_prep import filter_categories_coco, filter_categories_pvoc
