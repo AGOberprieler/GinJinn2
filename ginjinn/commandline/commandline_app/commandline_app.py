@@ -1,9 +1,9 @@
 ''' GinJinn commandline application code.
 '''
 
-from .argument_parser import GinjinnArgumentParser
+from ginjinn.commandline.argument_parser import GinjinnArgumentParser
 
-class GinjinnCommandlineApplication():
+class GinjinnCommandlineApplication:
     '''GinjinnCommandlineApplication
 
     GinJinn commandline application.
@@ -49,7 +49,7 @@ class GinjinnCommandlineApplication():
         '''_run_split
         Run the GinJinn split command.
         '''
-        from .splitter import ginjinn_split
+        from .split import ginjinn_split
         ginjinn_split(self.args)
 
     def _run_simulate(self):

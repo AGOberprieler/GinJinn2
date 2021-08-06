@@ -22,6 +22,8 @@ def write_evaluation(
         Dictionary containing the evalaution results
     file_path : str
         Path the evaluation results should be written to.
+    sep : str
+        Separator passed to pandas.DataFrame.to_csv
     '''
 
     res_df = pd.DataFrame.from_dict(eval_res)

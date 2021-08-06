@@ -10,4 +10,3 @@ def main():
     app = GinjinnCommandlineApplication()
     app.run()
     # print(app.args)
-    # print('GinJinn called!')
