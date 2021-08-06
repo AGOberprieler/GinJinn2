@@ -14,6 +14,8 @@ from .sw_image import setup_sw_image_parser
 from .sw_split import setup_sw_split_parser
 from .sw_merge import setup_sw_merge_parser
 
+from .sw_split2 import setup_sw_split_parser as setup_sw_split_parser2
+
 def setup_utils_parser(subparsers):
     '''setup_utils_parser
 
@@ -57,6 +59,7 @@ def setup_utils_parser(subparsers):
     setup_sliding_window_parser(utils_parsers)
     setup_sw_image_parser(utils_parsers)
     setup_sw_split_parser(utils_parsers)
+    setup_sw_split_parser2(utils_parsers)
     setup_sw_merge_parser(utils_parsers)
 
     return parser
