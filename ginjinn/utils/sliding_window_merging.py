@@ -856,7 +856,7 @@ def merge_sliding_window_predictions(
     img_dir : str
         Path to directory containing the images that the prediction was made for.
     ann_path : str
-        Path to predicted annotation.
+        Path to predicted COCO annotations.
     out_dir : str
         Path to directory that the merged annotations and images should be written to.
     task : str

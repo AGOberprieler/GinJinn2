@@ -1265,6 +1265,7 @@ def _setup_utils_parser(subparsers):
             Crop images and corresponding annotation into sliding windows.
         ''',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=False,
     )
 
     # required
@@ -1286,6 +1287,16 @@ def _setup_utils_parser(subparsers):
             path to a directory containing XML annotations for PVOC annotations.
         ''',
         required=True,
+    )
+    sliding_window_required.add_argument(
+        '-k', '--task',
+        choices = [
+            'instance-segmentation', 'bbox-detection'
+        ],
+        help = '''
+            Task, which the dataset will be used for. Only applies to COCO
+            datasets.
+        ''',
     )
 
     # optional
@@ -1334,33 +1345,6 @@ def _setup_utils_parser(subparsers):
         default=[200],
     )
     sliding_window_optional.add_argument(
-        '-k', '--task',
-        choices = [
-            'instance-segmentation', 'bbox-detection'
-        ],
-        help = '''
-            Task, which the dataset will be used for. Only applies to COCO
-            datasets.
-        ''',
-        default = 'instance-segmentation',
-    )
-    sliding_window_optional.add_argument(
-        '-m', '--img_id',
-        type = int,
-        help = '''
-            Starting image ID for newly generated image annotations.
-        ''',
-        default=1,
-    )
-    sliding_window_optional.add_argument(
-        '-b', '--obj_id',
-        type = int,
-        help = '''
-            Starting object ID for newly generated object annotations.
-        ''',
-        default=1,
-    )
-    sliding_window_optional.add_argument(
         '-r', '--remove_empty',
         dest = 'remove_empty',
         action = 'store_true',
@@ -1380,6 +1364,24 @@ def _setup_utils_parser(subparsers):
         '''
     )
     parser.set_defaults(remove_incomplete = False)
+    sliding_window_optional.add_argument(
+        '-m', '--img_id',
+        type = int,
+        help = '''
+            Starting image ID for newly generated image annotations.
+        ''',
+        default=1,
+    )
+    sliding_window_optional.add_argument(
+        '-b', '--obj_id',
+        type = int,
+        help = '''
+            Starting object ID for newly generated object annotations.
+        ''',
+        default=1,
+    )
+
+    sliding_window_optional.add_argument('-h', '--help', action='help', help='Show this help message and exit.')
 
     # == sw_image
     sw_image_parser = utils_parsers.add_parser(
@@ -1565,14 +1567,17 @@ def _setup_utils_parser(subparsers):
     sw_merge_parser = utils_parsers.add_parser(
         'sw_merge',
         help = '''
-            <EXPERIMENTAL> Merge sliding-window cropped images and annotations.
-            Objects will be merged only if they satisfy ALL three thresholds.
+            Merge sliding-window cropped images and annotations.
+            Objects will be merged only if they satisfy the intersection threshold and,
+            additionally, at least one of the IoU and IoS thresholds.
         ''',
         description = '''
-            <EXPERIMENTAL> Merge sliding-window cropped images and annotations.
-            Objects will be merged only if they satisfy ALL three thresholds.
+            Merge sliding-window cropped images and annotations.
+            Objects will be merged only if they satisfy the intersection threshold and,
+            additionally, at least one of the IoU and IoS thresholds.
         ''',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=False,
     )
 
     # required
@@ -1627,7 +1632,8 @@ def _setup_utils_parser(subparsers):
         '-u', '--iou_threshold',
         type = float,
         help = '''
-            Intersection over union threshold for merging in pixel.
+            Intersection over Union (IoU) threshold for merging in pixel.
+            Only calculated within the window overlap.
         ''',
         default=0.5,
     )
@@ -1635,14 +1641,34 @@ def _setup_utils_parser(subparsers):
         '-s', '--ios_threshold',
         type = float,
         help = '''
-            Intersection over smaller object threshold for merging in pixel.
+            Intersection over Smaller Object (IoS) threshold for merging in pixel.
         ''',
         default=0.8,
     )
+    sw_merge_optional.add_argument('-h', '--help', action='help', help='Show this help message and exit.')
 
+    # == other utils
+    # ...
 
-    # == visualize
-    visualize_parser = utils_parsers.add_parser(
+    return parser
+
+def _setup_visualize_parser(subparsers):
+    '''_setup_visualize_parser
+
+    Setup parser for the ginjinn visualize subcommand.
+
+    Parameters
+    ----------
+    subparsers
+        An object returned by argparse.ArgumentParser.add_subparsers()
+
+    Returns
+    -------
+    parser
+        An argparse ArgumentParser, registered for the visualize subcommand.
+    '''
+
+    visualize_parser = subparsers.add_parser(
         'visualize',
         help = '''
             Visualize object annotations on images.
@@ -1651,6 +1677,7 @@ def _setup_utils_parser(subparsers):
             Visualize object annotations on images.
         ''',
         aliases=['vis'],
+        add_help=False,
     )
 
     # required
@@ -1667,7 +1694,7 @@ def _setup_utils_parser(subparsers):
         '-a', '--ann_path',
         type = str,
         help = '''
-            Path to COCO annotation file (JSON) or PVCO annotation directory.
+            Path to COCO annotation file (JSON) or PVOC annotation directory.
         ''',
         required=True,
     )
@@ -1687,7 +1714,7 @@ def _setup_utils_parser(subparsers):
         '-i', '--img_dir',
         type = str,
         help = '''
-            Directory containing (potentially a subset) of the annotated images.
+            Directory containing (potentially a subset of) the annotated images.
             By default, will be inferred.
         ''',
         default = None,
@@ -1702,10 +1729,9 @@ def _setup_utils_parser(subparsers):
         default = 'auto'
     )
 
-    # == other utils
-    # ...
+    visualize_parser_optional.add_argument('-h', '--help', action='help', help='Show this help message and exit.')
 
-    return parser
+    return visualize_parser
 
 # Note: It is a deliberate decision not to subclass argparse.ArgumentParser.
 #       It might be preferable to work with composition instead of inheritance,
@@ -1779,3 +1805,4 @@ class GinjinnArgumentParser():
         _setup_split_parser(self._subparsers)
         _setup_train_parser(self._subparsers)
         _setup_utils_parser(self._subparsers)
+        _setup_visualize_parser(self._subparsers)

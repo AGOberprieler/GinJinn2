@@ -42,6 +42,8 @@ class GinjinnCommandlineApplication():
             self._run_predict()
         elif self.args.subcommand == 'info':
             self._run_info()
+        elif self.args.subcommand in ['visualize', 'vis']:
+            self._run_visualize()
 
     def _run_split(self):
         '''_run_split
@@ -98,3 +100,10 @@ class GinjinnCommandlineApplication():
         '''
         from .info import ginjinn_info
         ginjinn_info(self.args)
+
+    def _run_visualize(self):
+        '''_run_visualize
+        Run the GinJinn visualize command.
+        '''
+        from .visualize import ginjinn_visualize
+        ginjinn_visualize(self.args)
