@@ -10,7 +10,7 @@ import math
 import os
 import copy
 import xml
-from typing import Generator, List, Sequence, Tuple, Optional
+from typing import Callable, Generator, List, Sequence, Tuple, Optional
 import numpy as np
 #from numpy.typing import DTypeLike
 import cv2
@@ -681,6 +681,7 @@ def sliding_window_crop_coco(
     save_empty: bool=True,
     keep_incomplete: bool=True,
     task: str='instance-segmentation',
+    progress_callback: Optional[Callable] = None,
 ):
     '''sliding_window_crop_coco
 
@@ -716,6 +717,8 @@ def sliding_window_crop_coco(
     task : str, optional
         Task the dataset will be used for. Eiter "bbox-detection" or
         "instance-segmentation"
+    progress_callback : Optional[Callable]
+        Progress callback function.
     '''
     ann = load_coco_ann(ann_path)
     img_anns = ann['images']
@@ -757,6 +760,9 @@ def sliding_window_crop_coco(
             )
 
         img_id, obj_id = i_id, o_id
+
+        if not progress_callback is None:
+            progress_callback()
 
     # print('new_obj_anns:', new_obj_anns)
 
@@ -919,6 +925,7 @@ def sliding_window_crop_pvoc(
     vert_overlap: int,
     save_empty: bool = True,
     keep_incomplete: bool = True,
+    progress_callback: Optional[Callable] = None,
 ):
     '''sliding_window_crop_pvoc
 
@@ -948,6 +955,8 @@ def sliding_window_crop_pvoc(
         by default True
     keep_incomplete : bool
         If false, trimmed object annotations are discarded.
+    progress_callback: Optional[Callable]
+        Optional callback function for progress reporting.
     '''
     ann_files = glob.glob(os.path.join(ann_dir, '*.xml'))
 
@@ -985,6 +994,9 @@ def sliding_window_crop_pvoc(
             )
             img_filepath = os.path.join(img_dir_out, f'{filename}{ext}')
             cv2.imwrite(img_filepath, cropped_img)
+    
+        if not progress_callback is None:
+            progress_callback()
 
 def sliding_window_crop_images(
     img_dir: str,
@@ -993,6 +1005,7 @@ def sliding_window_crop_images(
     win_height: int,
     hor_overlap: int,
     vert_overlap: int,
+    progress_callback: Optional[Callable] = None,
 ):
     '''sliding_window_crop_images
 
@@ -1012,6 +1025,8 @@ def sliding_window_crop_images(
         Horizontal overlap of neighboring windows (px)
     vert_overlap: int
         Vertical overlap of neighboring windows (px)
+    progress_callback: Optional[Callable]
+        Optional callback function for progress reporting.
     '''
     from .utils import get_image_files
     img_files = get_image_files(img_dir=img_dir)
@@ -1043,3 +1058,6 @@ def sliding_window_crop_images(
 
             img_filepath = os.path.join(img_dir_out, f'{cropped_img_name}')
             cv2.imwrite(img_filepath, cropped_img)
+
+        if not progress_callback is None:
+            progress_callback()

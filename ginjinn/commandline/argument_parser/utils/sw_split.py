@@ -30,14 +30,14 @@ def setup_sw_split_parser(subparsers):
 
             |R|RIf -I/--dataset_dir is provided, a simple dataset (COCO or PVOC), or a split dataset as generated
             by ginjinn split will be subjected to sliding-window splitting.
-            |RExample: ginjinn sw_split -I my_dataset
+            |RExample: ginjinn sw_split -I my_dataset -o my_split_dataset
 
             |R|RIf only -i/--image_dir is provided, images will be split into sliding windows.
-            |RExample: ginjinn sw_split -i my_images
+            |RExample: ginjinn sw_split -i my_images -o my_split_images
 
             |R|RIf -i/--image_dir and -a/--ann_path are provided, the images and the corresponding annotations
             will be split into sliding windows.
-            |RExample: ginjinn sw_split -a my_dataset/annotations.json -i my_dataset/images
+            |RExample: ginjinn sw_split -a my_dataset/annotations.json -i my_dataset/images -o my_split_dataset
         ''',
         formatter_class=NewlineFormatter,
         add_help=False,
@@ -78,7 +78,7 @@ def setup_sw_split_parser(subparsers):
         '-o', '--out_dir',
         type = str,
         help = '''
-            Path to directory, which the sliding-window cropped datasets should be written to.
+            Output directory. Will be created if it does not exist.
         ''',
         required=True,
     )
@@ -117,8 +117,7 @@ def setup_sw_split_parser(subparsers):
             'instance-segmentation', 'bbox-detection'
         ],
         help = '''
-            Task, which the dataset will be used for. Only applies to COCO
-            datasets.
+            Task, which the dataset will be used for.
         ''',
         default = 'instance-segmentation',
     )
@@ -146,7 +145,7 @@ def setup_sw_split_parser(subparsers):
         '-m', '--img_id',
         type = int,
         help = '''
-            Starting image ID for newly generated image annotations.
+            Starting image ID for newly generated image annotations. Relevant for COCO annotations only.
         ''',
         default=1,
     )
@@ -154,7 +153,7 @@ def setup_sw_split_parser(subparsers):
         '-b', '--obj_id',
         type = int,
         help = '''
-            Starting object ID for newly generated object annotations.
+            Starting object ID for newly generated object annotations. Relevant for COCO annotations only.
         ''',
         default=1,
     )
