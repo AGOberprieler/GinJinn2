@@ -62,7 +62,7 @@ def setup_flatten_parser(subparsers):
         '-a', '--ann_path',
         type = str,
         help = '''
-            Path to the COCO (JSON) annotation file.
+            Path to a COCO (JSON) annotation file.
         ''',
         required=False,
     )

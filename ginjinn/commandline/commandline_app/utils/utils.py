@@ -7,7 +7,6 @@ from .crop import utils_crop
 from .filter_cat import utils_filter_cat
 from .filter_size import utils_filter_size
 from .flatten import utils_flatten
-from .flatten_img_dir import utils_flatten_img_dir
 from .merge import utils_merge
 from .sw_merge import utils_sw_merge
 from .sw_split import utils_sw_split
@@ -35,8 +34,6 @@ def ginjinn_utils(args):
         utils_cleanup(args)
     elif args.utils_subcommand == 'flatten':
         utils_flatten(args)
-    elif args.utils_subcommand == 'flatten_img_dir':
-        utils_flatten_img_dir(args)
     elif args.utils_subcommand == 'crop':
         utils_crop(args)
     elif args.utils_subcommand == 'sw_split':
