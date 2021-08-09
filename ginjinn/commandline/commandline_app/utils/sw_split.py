@@ -7,7 +7,6 @@ import tqdm
 from enum import Enum
 import os
 import sys
-import shutil
 from typing import Iterable, Tuple
 
 
