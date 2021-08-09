@@ -5,7 +5,7 @@ import glob
 import json
 import os
 import shutil
-from typing import List
+from typing import List, Callable, Optional
 import xml.etree.ElementTree as ET
 import datetime
 import cv2
@@ -20,7 +20,8 @@ def flatten_coco(
     sep: str = '~',
     unique_id: bool = False,
     annotated_only: bool = False,
-    link_images: bool = True
+    link_images: bool = True,
+    progress_callback: Optional[Callable] = None,
 ):
     '''flatten_coco
 
@@ -44,6 +45,8 @@ def flatten_coco(
         Whether only annotated images should be kept in the data set.
     link_images : bool, optional
         If true, images won't be copied but hard-linked instead.
+    progress_callback : Optional[Callable]
+        Optional callback function for progress reporting.
     '''
     with open(ann_file) as ann_f:
         annotations = json.load(ann_f)
@@ -80,6 +83,9 @@ def flatten_coco(
                 os.path.join(out_img_dir, new_file_name)
             )
 
+        if not progress_callback is None:
+            progress_callback()
+
     out_ann_file = os.path.join(out_dir, 'annotations.json')
     with open(out_ann_file, 'w') as ann_f:
         json.dump(annotations, ann_f, indent=2)
@@ -98,7 +104,8 @@ def flatten_img_dir(
     out_dir: str,
     sep: str = '~',
     unique_id: bool = False,
-    link_images: bool = True
+    link_images: bool = True,
+    progress_callback: Optional[Callable] = None,
 ):
     '''flatten_img_dir
     Flatten a nested image directory.
@@ -116,6 +123,8 @@ def flatten_img_dir(
         Whether the new image name should be replaced with a unique id, by default False
     link_images : bool, optional
         If true, images won't be copied but hard-linked instead.
+    progress_callback : Optional[Callable]
+        Optional callback function for progress reporting.
     '''
     out_img_dir = os.path.join(out_dir, 'images')
     if not os.path.exists(out_img_dir):
@@ -147,6 +156,9 @@ def flatten_img_dir(
             )
 
         i_img += 1
+
+        if not progress_callback is None:
+            progress_callback()
 
     if unique_id:
         id_map_file = os.path.join(out_dir, 'id_map.csv')

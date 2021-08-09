@@ -3,6 +3,7 @@ Module for generic helper functions.
 """
 
 from collections import defaultdict
+from enum import Enum
 import sys
 import json
 import glob

@@ -27,6 +27,7 @@ requirements:
     - mock
     - imantics
     - scikit-learn
+    - tqdm
 
 build:
   string: pt18_cu102_py{{ python | replace(".", "") }}{{ '_nightly' if environ.get('NIGHTLY') else '' }}
