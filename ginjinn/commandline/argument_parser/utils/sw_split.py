@@ -97,7 +97,7 @@ def setup_sw_split_parser(subparsers):
             "-s 500", for example, crops sliding windows of size 500*500 (w*h), while "-s 500 300" crops 
             windows of size 500*300.
         ''',
-        default=[1000],
+        default=[1024],
     )
     optional.add_argument(
         '-p', '--overlap',
@@ -107,9 +107,9 @@ def setup_sw_split_parser(subparsers):
             Overlap between sliding windows in pixel.
             If one argument is passed, the same overlap is used in horizontal and vertical direction.
             If two arguments are passed, they are interpreted as overlap in horizontal and
-            vertical, respectively.
+            vertical direction, respectively.
         ''',
-        default=[0.5],
+        default=[256],
     )
     optional.add_argument(
         '-k', '--task',
