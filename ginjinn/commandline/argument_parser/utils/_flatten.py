@@ -1,7 +1,7 @@
 ''' ginjinn utils flatten parser
 '''
 
-from ginjinn.commandline.argument_parser.argparse_utils import NewlineFormatter
+import argparse
 
 def setup_flatten_parser(subparsers):
     '''setup_flatten_parser
@@ -22,19 +22,12 @@ def setup_flatten_parser(subparsers):
     flatten_parser = subparsers.add_parser(
         'flatten',
         help = '''
-            Flatten image directory, or COCO dataset: move all images into a single, unnested directory.
-            In case of COCO input, annotations are adjusted accordingly.
+            Flatten a COCO dataset: move all images into a single, unnested directory, and adjust annotations accordingly.
         ''',
         description = '''
-            Flatten image directory, or COCO dataset: move all images into a single, unnested directory.
-            In case of COCO input, annotations are adjusted accordingly.
-            |R|RFlatten image directories by providing the -i/--image_root_dir argument only:
-            |Rginjinn utils flatten -i my_nested_images -o my_flattened_images
-
-            |R|RFlatten a COCO dataset by providing -i/--image_root_dir and -a/--ann_path:
-            |Rginjinn utils flatten -i my_dataset/images -a my_dataset/annotations.json -o my_flattened_dataset
+            Flatten a COCO dataset: move all images into a single, unnested directory, and adjust annotations accordingly.
         ''',
-        formatter_class=NewlineFormatter,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         add_help=False,
     )
 
@@ -64,7 +57,7 @@ def setup_flatten_parser(subparsers):
         help = '''
             Path to the COCO (JSON) annotation file.
         ''',
-        required=False,
+        required=True,
     )
 
     # optional
@@ -97,7 +90,6 @@ def setup_flatten_parser(subparsers):
         action = 'store_true',
         help = '''
             Keep only images with corresponding object annotations.
-            Only relevant for COCO input.
         '''
     )
     flatten_parser.set_defaults(annotated_only = False)

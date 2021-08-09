@@ -97,7 +97,7 @@ def check_ann_path(
     try:
         ann_type = get_annotation_type(ann_path)
     except InvalidAnnotationPath:
-        print(f'Could not find a valid annotation at "{ann_path}".')
+        print(f'ERROR: Could not find a valid annotation at "{ann_path}".')
         sys.exit(1)
 
     return ann_type
