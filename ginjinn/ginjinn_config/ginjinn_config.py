@@ -108,7 +108,7 @@ class GinjinnConfiguration: #pylint: disable=too-many-arguments,too-many-instanc
         config.OUTPUT_DIR = os.path.join(self.project_dir, 'outputs')
 
         # maybe remove this
-        print(config)
+        # print(config)
 
         return config
 

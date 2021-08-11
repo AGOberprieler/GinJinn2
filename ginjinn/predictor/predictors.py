@@ -8,7 +8,7 @@ import json
 import os
 import pickle
 from tempfile import NamedTemporaryFile
-from typing import Iterable, List, Optional, Union
+from typing import Callable, Iterable, List, Optional, Union
 import numpy as np
 import cv2
 import imantics
@@ -22,7 +22,7 @@ import torch
 from ginjinn.data_reader.data_reader import get_class_names
 from ginjinn.ginjinn_config import GinjinnConfiguration
 from ginjinn.utils.utils import bbox_from_polygons
-
+import warnings
 
 class GinjinnPredictor():
     '''A class for predicting from a trained Detectron2 model.
@@ -103,7 +103,8 @@ class GinjinnPredictor():
         threshold: Union[float, int] = 0.8,
         seg_refinement: bool = False,
         refinement_device: str = "cuda:0",
-        refinement_method: str = "full"
+        refinement_method: str = "full",
+        progress_callback: Optional[Callable] = None,
     ):
         """
         img_names : list of str, default=[]
@@ -130,6 +131,8 @@ class GinjinnPredictor():
             CPU or CUDA device for refinement with CascadePSP
         refinement_method : str, default="full"
             If set to "fast", the local refinement step will be skipped.
+        progress_callbacl : Optional[Callable]
+            Callback for progress reporting.
         """
         self.d2_cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold
         self.d2_cfg.MODEL.RETINANET.SCORE_THRESH_TEST = threshold
@@ -189,6 +192,9 @@ class GinjinnPredictor():
                 pickle.dump(masks, tmpfile)
                 pickle.dump(scores, tmpfile)
 
+                if progress_callback:
+                    progress_callback(1)
+
             d2_predictor = None
             torch.cuda.empty_cache()
 
@@ -237,12 +243,16 @@ class GinjinnPredictor():
                 if "visualization" in output_options:
                     self._save_visualization(image, img_name, scores, classes, boxes, masks)
 
+                if progress_callback:
+                    progress_callback(1)
+
             if "COCO" in output_options:
                 self._save_coco("annotations")
                 self._clear_coco("annotations")
 
                 if self.task == "instance-segmentation":
-                    self._save_coco("annotations_cropped")
+                    if "cropped" in output_options:
+                        self._save_coco("annotations_cropped")
                     self._clear_coco("annotations_cropped")
 
             refiner = None

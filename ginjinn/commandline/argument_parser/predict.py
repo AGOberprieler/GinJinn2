@@ -30,6 +30,8 @@ def setup_predict_parser(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         add_help=False,
     )
+
+    # Positional
     parser.add_argument(
         'project_dir',
         type = str,
@@ -49,22 +51,9 @@ def setup_predict_parser(subparsers):
         required=True,
     )
 
-    # TODO: refactor this!!!
-    # - always return COCO
-    # - optionally cropped and vis
-    required.add_argument(
-        '-s', '--output_types',
-        help = '''
-            Output types.
-        ''',
-        choices=['COCO', 'cropped', 'visualization'],
-        nargs='+',
-        action='append',
-        default=['COCO'],
-    )
-
     # Optional
     optional = parser.add_argument_group('optional arguments')
+
     optional.add_argument(
         '-o', '--out_dir',
         type = str,
@@ -76,13 +65,29 @@ def setup_predict_parser(subparsers):
     )
 
     optional.add_argument(
-        '-c', '--checkpoint',
-        type = str,
+        '-c', '--crop',
         help = '''
-            Checkpoint name. By default model_final.pth will be used.
+            Crop predicted bounding boxes and segmentation masks (segmentation models only) from
+            input images. Bounding boxes and masks are written to "<out_dir>/images_cropped" and
+            "<out_dir>/masks_cropped", respectively. In case of instance segmentation, an
+            additional COCO json file with annotations referring to the cropped images (bounding boxes)
+            will be written to "<out_dir>/annotations_cropped.json".
         ''',
-        default = "model_final.pth",
+        dest='crop',
+        action = 'store_true',
     )
+    parser.set_defaults(crop = False)
+
+    optional.add_argument(
+        '-v', '--visualize',
+        help = '''
+            Visualize predictions on input images. Visualization output is
+            written to "<out_dir>/visualization"
+        ''',
+        dest='visualize',
+        action = 'store_true',
+    )
+    parser.set_defaults(visualize = False)
 
     optional.add_argument(
         '-t', '--threshold',
@@ -98,9 +103,18 @@ def setup_predict_parser(subparsers):
         type = int,
         help = '''
             Padding for cropping bounding boxes in pixels.
-            Only relevant if cropped output option is enabled.
+            Only relevant if crop output option is enabled.
         ''',
         default = 0
+    )
+
+    optional.add_argument(
+        '-w', '--weights_checkpoint',
+        type = str,
+        help = '''
+            Checkpoint name. By default model_final.pth will be used.
+        ''',
+        default = "model_final.pth",
     )
 
     optional.add_argument(
@@ -133,6 +147,11 @@ def setup_predict_parser(subparsers):
         default='cuda:0',
     )
 
-    optional.add_argument('-h', '--help', action='help', help='Show this help message and exit.')
+    optional.add_argument(
+        '-h',
+        '--help',
+        action='help',
+        help='Show this help message and exit.'
+    )
 
     return parser
