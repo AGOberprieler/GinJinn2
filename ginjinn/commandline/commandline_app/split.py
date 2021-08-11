@@ -83,9 +83,6 @@ def ginjinn_split(args):
         subcommand.
     '''
 
-    # print('Running ginjinn split')
-    # print(args)
-
     # import here to avoid long startup time, when ginjinn_split is not called
     from ginjinn.data_reader.data_splitter import create_split_2
     from ginjinn.utils.utils import get_anntype, find_img_dir, ImageDirNotFound

@@ -903,7 +903,7 @@ def dataset_info(
     empty_cls_idc = count_df['total'] == 0
 
     print()
-    print('Dataset info for dataset')
+    print('Dataset info for')
     print(f'\tann_path: {ann_path}')
     print(f'\timg_dir: {img_dir}')
 
@@ -915,7 +915,7 @@ def dataset_info(
 
     if empty_cls_idc.any():
         print('')
-        print('<WARNING> Found categories without annotation')
+        print('WARNING: Found categories without annotation')
         for cls_nm in count_df.index[empty_cls_idc]:
             print(f'\t- "{cls_nm}"')
         print()
