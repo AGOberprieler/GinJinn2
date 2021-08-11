@@ -35,7 +35,7 @@ def setup_info_parser(subparsers):
             directores. The dataset directory must be a simple dataset; split datasets are not supported.
             |RExample: ginjinn info -I my_dataset
 
-            |R|R -i/--image_dir and -a/--ann_path can be provided, if the dataset is in a non-standard format.
+            |R|R-i/--image_dir and -a/--ann_path can be provided, if the dataset is in a non-standard format.
             |RExample: ginjinn info -a my_annotations.json -i my_images
         ''',
         formatter_class=NewlineFormatter,

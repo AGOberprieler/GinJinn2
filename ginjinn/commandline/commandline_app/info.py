@@ -89,7 +89,7 @@ def ginjinn_info(args):
 
         if ds_type == DatasetType.split:
             print(
-                'ERROR: ginjinn info can only be applied to simple datasets.'
+                'ERROR: ginjinn info can only be applied to simple (non-split) datasets.'
             )
             sys.exit(1)
 
