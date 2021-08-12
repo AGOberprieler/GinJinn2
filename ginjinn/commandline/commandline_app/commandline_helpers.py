@@ -39,6 +39,33 @@ def prepare_out_dir(
     else:
         os.mkdir(out_dir)
 
+def prepare_out_file(
+    out_file : str
+):
+    '''prepare_out_file
+
+    Check if out_file exists.
+    Can exit.
+
+    Parameters
+    ----------
+    out_file : str
+        Output file.
+    '''
+    from ginjinn.utils import confirmation_cancel
+
+    if exists(out_file):
+        if isdir(out_file):
+            print(f'ERROR: "{out_file}" is an existing directory.')
+            sys.exit(1)
+
+        msg = f'Output file "{out_file}" already exists. ' +\
+            f'Do you want to overwrite it?\n'
+        should_remove = confirmation_cancel(msg)
+        if should_remove:
+            os.remove(out_file)
+        else:
+            sys.exit(1)
 
 class AnnotationType(Enum):
     '''AnnotationType'''
@@ -243,8 +270,8 @@ def check_dataset_dir(
 
     Returns
     -------
-    Tuple[DatasetType, AnnotationType]
-        Dataset information: Dataset type, annotation type
+    Tuple[DatasetType, AnnotationType, Optional[Tuple[str]]]
+        Dataset information: Dataset type, annotation type, split info
     '''
 
     if not exists(dataset_dir):

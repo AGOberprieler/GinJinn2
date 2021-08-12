@@ -181,7 +181,7 @@ def ginjinn_split(args):
         check_image_dir(image_dir)
 
         ann_type = 'COCO' if ann_type == AnnotationType.COCO else 'PVOC'
-    
+
     prepare_out_dir(out_dir)
 
     from ginjinn.data_reader.data_splitter import create_split_2
