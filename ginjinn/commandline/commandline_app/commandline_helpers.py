@@ -1,13 +1,14 @@
 '''Commandline helpers
 '''
 
+from json import load
 import os
 from os import listdir
 from os.path import join, exists, isdir, isfile, basename, splitext
 import sys
 import shutil
 from enum import Enum
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 import tqdm
 
 def prepare_out_dir(
@@ -27,7 +28,7 @@ def prepare_out_dir(
 
     if exists(out_dir):
         msg = f'Output directory "{out_dir}" already exists. ' +\
-            f'Do you want to overwrite it? WARNING: this will remove "{out_dir}" directory ' +\
+            f'Do you want to overwrite it?\nWARNING: this will remove "{out_dir}" directory ' +\
             'and ALL SUBDIRECTORIES.\n'
         should_remove = confirmation_cancel(msg)
         if should_remove:
@@ -504,3 +505,35 @@ class MultistepProgressBars:
             return var
 
         return [var] * n_bars
+
+def get_n_annotations(
+    ann_path: str,
+) -> int:
+    '''get_n_annotations
+
+    Get number of object annotations.
+
+    Parameters
+    ----------
+    ann_path : str
+        Annotation path.
+
+    Returns
+    -------
+    int
+        Number of object annotations.
+    '''
+
+    ann_type = check_ann_path(ann_path)
+
+    if ann_type == AnnotationType.COCO:
+        from ginjinn.utils import load_coco_ann
+        ann = load_coco_ann(ann_path)
+        return len(ann['annotations'])
+
+    elif ann_type == AnnotationType.PVOC:
+        print('ERROR: PVOC annotations are not supported.')
+        sys.exit(1)
+    else:
+        print('ERROR: unknown annotation type.')
+        sys.exit(1)

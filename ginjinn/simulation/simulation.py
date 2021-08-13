@@ -3,6 +3,7 @@
 
 import os
 import json
+from typing import Callable, Optional
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import skimage.filters
@@ -36,6 +37,7 @@ def generate_simple_shapes_coco( #pylint: disable=too-many-arguments,too-many-lo
     max_rot: float = 60.0,
     noise: float = 0.005,
     triangle_prob: float = 0.5,
+    progress_callback: Optional[Callable] = None,
 ):
     '''Generate a simple COCO data set.
 
@@ -77,6 +79,8 @@ def generate_simple_shapes_coco( #pylint: disable=too-many-arguments,too-many-lo
         Amount of gaussian noise to add to image, by default 0.005
     triangle_prob : float, optional
         Probability of drawin a triangle, by default 0.5
+    progress_callback : Optional[Callable]
+        Callback for progress reporting.
     '''
     category_map = {
         'circle': 1,
@@ -137,6 +141,9 @@ def generate_simple_shapes_coco( #pylint: disable=too-many-arguments,too-many-lo
         img = img.astype(np.uint8)
         skimage.io.imsave(file_name, img)
 
+        if progress_callback:
+            progress_callback()
+
     dataset = build_coco_dataset(
         annotations,
         images,
@@ -168,6 +175,7 @@ def generate_simple_shapes_pvoc( #pylint: disable=too-many-arguments,too-many-lo
     noise: float = 0.005,
     triangle_prob: float = 0.5,
     encoding: str = 'utf-8',
+    progress_callback: Optional[Callable] = None,
 ):
     '''Generate a simple PVOC data set.
 
@@ -211,6 +219,8 @@ def generate_simple_shapes_pvoc( #pylint: disable=too-many-arguments,too-many-lo
         Probability of drawin a triangle, by default 0.5
     encoding : str, optional
         XML encoding, by default 'utf-8'.
+    progress_callback : Optional[Callable]
+        Callback for progress reporting.
     '''
     annotations = []
     images = []
@@ -267,6 +277,9 @@ def generate_simple_shapes_pvoc( #pylint: disable=too-many-arguments,too-many-lo
         img *= 255
         img = img.astype(np.uint8)
         skimage.io.imsave(file_name, img)
+
+        if progress_callback:
+            progress_callback()
 
     for ann_id, ann in enumerate(annotations):
         file_name = os.path.join(ann_dir, f'img_{ann_id + 1}.xml')

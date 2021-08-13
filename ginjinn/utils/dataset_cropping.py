@@ -239,7 +239,8 @@ def crop_seg_from_coco(
     ann_file: str,
     img_dir: str,
     outdir: str,
-    padding: int = 0
+    padding: int = 0,
+    progress_callback: Optional[Callable] = None,
 ):
     """
     This function reads annotations in COCO format and crops each segmentation instance from
@@ -258,6 +259,8 @@ def crop_seg_from_coco(
         This option allows to increase the cropping range beyond the borders of a segmented object.
         If possible, each side of the corresponding bounding box is shifted by the same number of
         pixels.
+    progress_callback : Optional[Callable]
+        Callback for progress reporting.
 
     Raises
     ------
@@ -378,6 +381,9 @@ def crop_seg_from_coco(
             obj_counter[annotation["image_id"]] += 1
             i_ann += 1
 
+            if progress_callback:
+                progress_callback()
+
     # write COCO json file
     json_new = os.path.join(outdir, "annotations.json")
     with open(json_new, 'w') as json_file:
@@ -397,7 +403,8 @@ def crop_bbox_from_coco(
     ann_file: str,
     img_dir: str,
     outdir: str,
-    padding: int = 0
+    padding: int = 0,
+    progress_callback: Optional[Callable] = None,
 ):
     """
     This function reads annotations in COCO format and crops each contained bounding box from
@@ -417,6 +424,8 @@ def crop_bbox_from_coco(
         This option allows to increase the cropping range beyond the borders of the original
         bounding box. If possible, each side of the latter is shifted by the same number of
         pixels.
+    progress_callback : Optional[Callable]
+        Callback for progress reporting.
 
     Raises
     ------
@@ -513,6 +522,9 @@ def crop_bbox_from_coco(
 
             obj_counter[annotation["image_id"]] += 1
             i_ann += 1
+
+            if progress_callback:
+                progress_callback()
 
     # write COCO json file
     json_new = os.path.join(outdir, "annotations.json")
