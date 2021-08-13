@@ -6,9 +6,9 @@ def resize_max_side(im, size, method):
     max_side = max(h, w)
     ratio = size / max_side
     if method in ['bilinear', 'bicubic']:
-        return F.interpolate(im, scale_factor=ratio, mode=method, align_corners=False)
+        return F.interpolate(im, scale_factor=ratio, mode=method, align_corners=False, recompute_scale_factor=True)
     else:
-        return F.interpolate(im, scale_factor=ratio, mode=method)
+        return F.interpolate(im, scale_factor=ratio, mode=method, recompute_scale_factor=True)
 
 def safe_forward(model, im, seg, inter_s8=None, inter_s4=None):
     """
@@ -80,8 +80,8 @@ def process_high_res_im(model, im, seg, L=900):
         combined_224 = torch.zeros_like(seg_small)
         combined_weight = torch.zeros_like(seg_small)
 
-        r_pred_224 = (F.interpolate(pred_224, size=(h, w), mode='bilinear', align_corners=False)>0.5).float()*2-1
-        r_pred_56 = F.interpolate(pred_56, size=(h, w), mode='bilinear', align_corners=False)*2-1
+        r_pred_224 = (F.interpolate(pred_224, size=(h, w), mode='bilinear', align_corners=False, recompute_scale_factor=True)>0.5).float()*2-1
+        r_pred_56 = F.interpolate(pred_56, size=(h, w), mode='bilinear', align_corners=False, recompute_scale_factor=True)*2-1
 
         padding = 16
         step_size = stride - padding*2
@@ -163,7 +163,7 @@ def process_high_res_im(model, im, seg, L=900):
 
     _, _, h, w = seg.shape
     images = {}
-    images['pred_224'] = F.interpolate(pred_224, size=(h, w), mode='bilinear', align_corners=True)
+    images['pred_224'] = F.interpolate(pred_224, size=(h, w), mode='bilinear', align_corners=True, recompute_scale_factor=True)
 
     return images['pred_224']
 
@@ -185,8 +185,8 @@ def process_im_single_pass(model, im, seg, L=900):
     images = safe_forward(model, im, seg)
 
     if max(h, w) < L:
-        images['pred_224'] = F.interpolate(images['pred_224'], size=(h, w), mode='area')
+        images['pred_224'] = F.interpolate(images['pred_224'], size=(h, w), mode='area', recompute_scale_factor=True)
     elif max(h, w) > L:
-        images['pred_224'] = F.interpolate(images['pred_224'], size=(h, w), mode='bilinear', align_corners=True)
+        images['pred_224'] = F.interpolate(images['pred_224'], size=(h, w), mode='bilinear', align_corners=True, recompute_scale_factor=True)
 
     return images['pred_224']

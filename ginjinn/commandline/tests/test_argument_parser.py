@@ -24,7 +24,6 @@ def test_simple_():
         '-a', 'my_annotations.json',
         '-o', 'my_split_dir',
         '-d', 'instance-segmentation',
-        '-k', 'COCO',
         '-t', '0.2',
         '-v', '0.2'
     ])

@@ -5,6 +5,8 @@ import os
 import sys
 import shutil
 
+import tqdm
+
 from ginjinn.utils import confirmation_cancel
 from ginjinn.simulation import generate_simple_shapes_coco, generate_simple_shapes_pvoc
 
@@ -66,25 +68,27 @@ def simulate_shapes(args):
         circle_col =  [int(circle_col[i:i+2], 16) / 255 for i in (0, 2, 4)]
         triangle_col =  [int(triangle_col[i:i+2], 16) / 255 for i in (0, 2, 4)]
 
-        generate_simple_shapes_coco(
-            img_dir=img_dir,
-            ann_file=ann_path,
-            n_images=args.n_images,
-            min_w=args.min_w,
-            max_w=args.max_w,
-            min_h=args.min_h,
-            max_h=args.max_h,
-            min_n_shapes=args.min_n_shapes,
-            max_n_shapes=args.max_n_shapes,
-            circle_col=circle_col,
-            triangle_col=triangle_col,
-            col_var=args.color_variance,
-            min_r=args.min_shape_radius,
-            max_r=args.max_shape_radius,
-            min_rot=args.min_shape_angle,
-            max_rot=args.max_shape_angle,
-            noise=args.noise,
-        )
+        with tqdm.tqdm(total=args.n_images, desc='simulating', unit='image') as pbar:
+            generate_simple_shapes_coco(
+                img_dir=img_dir,
+                ann_file=ann_path,
+                n_images=args.n_images,
+                min_w=args.min_w,
+                max_w=args.max_w,
+                min_h=args.min_h,
+                max_h=args.max_h,
+                min_n_shapes=args.min_n_shapes,
+                max_n_shapes=args.max_n_shapes,
+                circle_col=circle_col,
+                triangle_col=triangle_col,
+                col_var=args.color_variance,
+                min_r=args.min_shape_radius,
+                max_r=args.max_shape_radius,
+                min_rot=args.min_shape_angle,
+                max_rot=args.max_shape_angle,
+                noise=args.noise,
+                progress_callback=pbar.update,
+            )
 
         print(f'Simulated dataset written to "{out_dir}".')
 
@@ -101,24 +105,26 @@ def simulate_shapes(args):
         circle_col =  [int(circle_col[i:i+2], 16) / 255 for i in (0, 2, 4)]
         triangle_col =  [int(triangle_col[i:i+2], 16) / 255 for i in (0, 2, 4)]
 
-        generate_simple_shapes_pvoc(
-            img_dir=img_dir,
-            ann_dir=ann_dir,
-            n_images=args.n_images,
-            min_w=args.min_w,
-            max_w=args.max_w,
-            min_h=args.min_h,
-            max_h=args.max_h,
-            min_n_shapes=args.min_n_shapes,
-            max_n_shapes=args.max_n_shapes,
-            circle_col=circle_col,
-            triangle_col=triangle_col,
-            col_var=args.color_variance,
-            min_r=args.min_shape_radius,
-            max_r=args.max_shape_radius,
-            min_rot=args.min_shape_angle,
-            max_rot=args.max_shape_angle,
-            noise=args.noise,
-        )
+        with tqdm.tqdm(total=args.n_images, desc='simulating', unit='image') as pbar:
+            generate_simple_shapes_pvoc(
+                img_dir=img_dir,
+                ann_dir=ann_dir,
+                n_images=args.n_images,
+                min_w=args.min_w,
+                max_w=args.max_w,
+                min_h=args.min_h,
+                max_h=args.max_h,
+                min_n_shapes=args.min_n_shapes,
+                max_n_shapes=args.max_n_shapes,
+                circle_col=circle_col,
+                triangle_col=triangle_col,
+                col_var=args.color_variance,
+                min_r=args.min_shape_radius,
+                max_r=args.max_shape_radius,
+                min_rot=args.min_shape_angle,
+                max_rot=args.max_shape_angle,
+                noise=args.noise,
+                progress_callback=pbar.update,
+            )
 
         print(f'Simulated dataset written to "{out_dir}".')

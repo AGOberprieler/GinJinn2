@@ -64,7 +64,7 @@ def ginjinn_predict(args):
         img_names = [image_path]
 
     # checkpoint
-    checkpoint_name = args.checkpoint
+    checkpoint_name = args.weights_checkpoint
     checkpoint_file = os.path.join(
         config.project_dir, 'outputs', checkpoint_name
     )
@@ -76,14 +76,11 @@ def ginjinn_predict(args):
         sys.exit(1)
 
     # output
+    from ginjinn.commandline.commandline_app.commandline_helpers import prepare_out_dir
     out_dir = args.out_dir
     if out_dir is None:
         out_dir = os.path.join(config.project_dir, 'prediction')
-        if not os.path.exists(out_dir):
-            os.mkdir(out_dir)
-    else:
-        if not os.path.exists(out_dir):
-            os.mkdir(out_dir)
+    prepare_out_dir(out_dir)
 
     # other
     threshold = args.threshold
@@ -91,9 +88,14 @@ def ginjinn_predict(args):
     seg_refinement = args.seg_refinement
     refinement_mode = args.refinement_mode
     device = args.device
+    crop = args.crop
+    visualize = args.visualize
 
-    output_options = args.output_types
-    output_options = list({x if not isinstance(x, list) else x[0] for x in output_options})
+    output_options = ['COCO']
+    if crop:
+        output_options.append('cropped')
+    if visualize:
+        output_options.append('visualization')
 
     from ginjinn.predictor import GinjinnPredictor
     predictor = GinjinnPredictor.from_ginjinn_config(
@@ -102,14 +104,22 @@ def ginjinn_predict(args):
         outdir=out_dir,
         checkpoint_name=checkpoint_name,
     )
-    predictor.predict(
-        img_names=img_names,
-        output_options=output_options,
-        padding=padding,
-        seg_refinement=seg_refinement,
-        refinement_device=device,
-        refinement_method=refinement_mode,
-        threshold=threshold,
-    )
+
+    from ginjinn.utils import get_image_files
+    from ginjinn.commandline.commandline_app.commandline_helpers import MultistepProgressBars
+    totals = [len(get_image_files(img_dir))] * 2
+    descs = ['prediction', 'refinement + output gen.'] if seg_refinement else ['prediction', 'output gen.']
+
+    with MultistepProgressBars(totals=totals, descs=descs, units='image') as pbars:
+        predictor.predict(
+            img_names=img_names,
+            output_options=output_options,
+            padding=padding,
+            seg_refinement=seg_refinement,
+            refinement_device=device,
+            refinement_method=refinement_mode,
+            threshold=threshold,
+            progress_callback=pbars.update,
+        )
 
     print(f'Predictions written to {out_dir}.')

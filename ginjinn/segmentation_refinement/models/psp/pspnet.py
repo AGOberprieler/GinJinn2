@@ -20,7 +20,7 @@ class PSPModule(nn.Module):
 
     def forward(self, feats):
         h, w = feats.size(2), feats.size(3)
-        set_priors = [F.interpolate(input=stage(feats), size=(h, w), mode='bilinear', align_corners=False) for stage in self.stages]
+        set_priors = [F.interpolate(input=stage(feats), size=(h, w), mode='bilinear', align_corners=False, recompute_scale_factor=True) for stage in self.stages]
         priors = set_priors + [feats]
         bottle = self.bottleneck(torch.cat(priors, 1))
         return self.relu(bottle)
@@ -50,7 +50,7 @@ class PSPUpsample(nn.Module):
         self.shortcut = nn.Conv2d(x_channels, out_channels, kernel_size=1)
 
     def forward(self, x, up):
-        x = F.interpolate(input=x, scale_factor=2, mode='bilinear', align_corners=False)
+        x = F.interpolate(input=x, scale_factor=2, mode='bilinear', align_corners=False, recompute_scale_factor=True)
 
         p = self.conv(torch.cat([x, up], 1))
         sc = self.shortcut(x)
@@ -102,7 +102,7 @@ class RefinementModule(nn.Module):
             p = self.psp(f)
 
             inter_s8 = self.final_28(p)
-            r_inter_s8 = F.interpolate(inter_s8, scale_factor=8, mode='bilinear', align_corners=False)
+            r_inter_s8 = F.interpolate(inter_s8, scale_factor=8, mode='bilinear', align_corners=False, recompute_scale_factor=True)
             r_inter_tanh_s8 = torch.tanh(r_inter_s8)
 
             images['pred_28'] = torch.sigmoid(r_inter_s8)
@@ -119,7 +119,7 @@ class RefinementModule(nn.Module):
             f, f_1, f_2 = self.feats(p) 
             p = self.psp(f)
             inter_s8_2 = self.final_28(p)
-            r_inter_s8_2 = F.interpolate(inter_s8_2, scale_factor=8, mode='bilinear', align_corners=False)
+            r_inter_s8_2 = F.interpolate(inter_s8_2, scale_factor=8, mode='bilinear', align_corners=False, recompute_scale_factor=True)
             r_inter_tanh_s8_2 = torch.tanh(r_inter_s8_2)
 
             p = self.up_1(p, f_2)
@@ -144,11 +144,11 @@ class RefinementModule(nn.Module):
         f, f_1, f_2 = self.feats(p) 
         p = self.psp(f)
         inter_s8_3 = self.final_28(p)
-        r_inter_s8_3 = F.interpolate(inter_s8_3, scale_factor=8, mode='bilinear', align_corners=False)
+        r_inter_s8_3 = F.interpolate(inter_s8_3, scale_factor=8, mode='bilinear', align_corners=False, recompute_scale_factor=True)
 
         p = self.up_1(p, f_2)
         inter_s4_2 = self.final_56(p)
-        r_inter_s4_2 = F.interpolate(inter_s4_2, scale_factor=4, mode='bilinear', align_corners=False)
+        r_inter_s4_2 = F.interpolate(inter_s4_2, scale_factor=4, mode='bilinear', align_corners=False, recompute_scale_factor=True)
         p = self.up_2(p, f_1)
         p = self.up_3(p, x)
 

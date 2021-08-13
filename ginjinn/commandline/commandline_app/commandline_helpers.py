@@ -1,13 +1,15 @@
 '''Commandline helpers
 '''
 
+from json import load
 import os
 from os import listdir
 from os.path import join, exists, isdir, isfile, basename, splitext
 import sys
 import shutil
 from enum import Enum
-from typing import Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+import tqdm
 
 def prepare_out_dir(
     out_dir : str
@@ -26,7 +28,7 @@ def prepare_out_dir(
 
     if exists(out_dir):
         msg = f'Output directory "{out_dir}" already exists. ' +\
-            f'Do you want to overwrite it? WARNING: this will remove "{out_dir}" directory ' +\
+            f'Do you want to overwrite it?\nWARNING: this will remove "{out_dir}" directory ' +\
             'and ALL SUBDIRECTORIES.\n'
         should_remove = confirmation_cancel(msg)
         if should_remove:
@@ -38,6 +40,33 @@ def prepare_out_dir(
     else:
         os.mkdir(out_dir)
 
+def prepare_out_file(
+    out_file : str
+):
+    '''prepare_out_file
+
+    Check if out_file exists.
+    Can exit.
+
+    Parameters
+    ----------
+    out_file : str
+        Output file.
+    '''
+    from ginjinn.utils import confirmation_cancel
+
+    if exists(out_file):
+        if isdir(out_file):
+            print(f'ERROR: "{out_file}" is an existing directory.')
+            sys.exit(1)
+
+        msg = f'Output file "{out_file}" already exists. ' +\
+            f'Do you want to overwrite it?\n'
+        should_remove = confirmation_cancel(msg)
+        if should_remove:
+            os.remove(out_file)
+        else:
+            sys.exit(1)
 
 class AnnotationType(Enum):
     '''AnnotationType'''
@@ -228,7 +257,7 @@ class DatasetType(Enum):
     split = 1
 
 def check_dataset_dir(
-    dataset_dir: str
+    dataset_dir: str,
 ) -> Tuple[DatasetType, AnnotationType, Optional[Tuple[str]]]:
     '''check_dataset_dir
 
@@ -242,8 +271,8 @@ def check_dataset_dir(
 
     Returns
     -------
-    Tuple[DatasetType, AnnotationType]
-        Dataset information: Dataset type, annotation type
+    Tuple[DatasetType, AnnotationType, Optional[Tuple[str]]]
+        Dataset information: Dataset type, annotation type, split info
     '''
 
     if not exists(dataset_dir):
@@ -340,4 +369,171 @@ def check_dataset_dir(
 
     else:
         print(f'ERROR: Could not identify any valid dataset in "{dataset_dir}".')
+        sys.exit(1)
+
+class MultistepProgressBars:
+    '''MultistepProgressBar
+
+    Parameters
+    ----------
+    totals : Union[List[int], int]
+        Total number of iterations for each single progress bar.
+    descs : Optional[Union[List[str], str]], optional
+        Descriptions for each single progress bar.
+    units : Union[List[str], str], optional
+        Units for each single progress bar, by default 'it'
+    minintervals : Union[List[float], float], optional
+        Minimum progress update interval for each single progress bar, by default 0.1
+    maxintervals : Union[List[float], float], optional
+        Maximum progress update interval for each single progress bar, by default 10
+    ncols : Optional[Union[List[int], int]], optional
+        Progress bar width for each single progress bar, by default None
+    '''
+    def __init__(
+        self,
+        totals: Union[List[int], int],
+        descs: Optional[Union[List[str], str]] = None,
+        units: Union[List[str], str] = 'it',
+        minintervals: Union[List[float], float] = 0.1,
+        maxintervals: Union[List[float], float] = 10,
+        ncols: Optional[Union[List[int], int]] = None,
+    ) -> None:
+        self.n_bars = len(totals) if isinstance(totals, list) else len(totals)
+
+        self.totals = self._prepare_variable(totals, 'totals')
+        self.descs = self._prepare_variable(descs, 'descs')
+        self.units = self._prepare_variable(units, 'units')
+        self.minintervals = self._prepare_variable(minintervals, 'minintervals')
+        self.maxintervals = self._prepare_variable(maxintervals, 'maxintervals')
+        self.ncols = self._prepare_variable(ncols, 'ncols')
+
+        self._step = -1
+        self._progress = [0] * self.n_bars
+        self._pbars = [None] * self.n_bars
+
+        self._next_pbar()
+
+    def update(self, n=1):
+        '''update
+
+        Update current progress bar. If the current progress bar is full,
+        the next progress bar will be initialized according to totals.
+        WARNING: Overflowing progress will be IGNORED
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of iterations to update the current progress bar, by default 1
+        '''
+        step = self._step
+
+        self._progress[step] += n
+        self._pbars[step].update(n)
+        if self._progress[step] >= self.totals[step]:
+            self._next_pbar()
+
+    def display(self):
+        '''Display all progress bars.
+        '''
+        for pbar in self._pbars:
+            if pbar:
+                pbar.display()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        step = self._step
+        pbar = self._pbars[step] if step < self.n_bars else None
+        if pbar:
+            pbar.close()
+
+    def _next_pbar(self):
+        '''Setup next progress bar if not finished.
+        '''
+        step = self._step
+        pbar = self._pbars[self._step] if step > -1 else None
+        if pbar:
+            pbar.close()
+
+        self._step += 1
+        if self._step < self.n_bars:
+            self._pbars[self._step] = tqdm.tqdm(
+                total=self.totals[self._step],
+                desc=self.descs[self._step],
+                unit=self.units[self._step],
+                mininterval=self.minintervals[self._step],
+                maxinterval=self.maxintervals[self._step],
+                ncols=self.ncols[self._step],
+            )
+
+    def _prepare_variable(
+        self,
+        var: Union[Any, List[Any]],
+        var_name: str,
+    ) -> List[Any]:
+        '''_prepare_variable
+
+        Prepares input variables:
+            - single value -> replicate single value for each progress bar
+            - list of values -> make sure list has as many entries as there are progress bars.
+
+        Parameters
+        ----------
+        var : Union[Any, List[Any]]
+            Variable value, either a single value or a list of values.
+        var_name : str
+            Name of the variable. Used for error reporting.
+
+        Returns
+        -------
+        List[Any]
+            Variable value as list.
+
+        Raises
+        ------
+        Exception
+            Raised if list length does not match the number of progress bars.
+        '''
+        n_bars = self.n_bars
+
+        if isinstance(var, list):
+            if len(var) != n_bars:
+                msg = f'Expected {n_bars} entries but got ' +\
+                    f'{len(var)} entries for variable "{var_name}".'
+                raise Exception(msg)
+            return var
+
+        return [var] * n_bars
+
+def get_n_annotations(
+    ann_path: str,
+) -> int:
+    '''get_n_annotations
+
+    Get number of object annotations.
+
+    Parameters
+    ----------
+    ann_path : str
+        Annotation path.
+
+    Returns
+    -------
+    int
+        Number of object annotations.
+    '''
+
+    ann_type = check_ann_path(ann_path)
+
+    if ann_type == AnnotationType.COCO:
+        from ginjinn.utils import load_coco_ann
+        ann = load_coco_ann(ann_path)
+        return len(ann['annotations'])
+
+    elif ann_type == AnnotationType.PVOC:
+        print('ERROR: PVOC annotations are not supported.')
+        sys.exit(1)
+    else:
+        print('ERROR: unknown annotation type.')
         sys.exit(1)
