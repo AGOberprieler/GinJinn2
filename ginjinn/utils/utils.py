@@ -10,7 +10,7 @@ import glob
 import os
 import xml
 import xml.etree.ElementTree as et
-from typing import List, Sequence, Tuple
+from typing import Callable, List, Optional, Sequence, Tuple
 import imantics
 import numpy as np
 from pycocotools import mask as pmask
@@ -750,6 +750,7 @@ def visualize_annotations(
     out_dir: str,
     ann_type: str,
     vis_type: str,
+    progress_callback: Optional[Callable] = None,
 ):
     '''visualize_annotations
 
@@ -770,6 +771,8 @@ def visualize_annotations(
     vis_type : str
         Type of visualization. Either "segmentation" or "bbox". For PVOC annotations,
         only "bbox" is allowed.
+    progress_callback : Optional[Callable]
+        Callback for progress reporting.
 
     Raises
     ------
@@ -852,6 +855,9 @@ def visualize_annotations(
         vis_img.save(
             os.path.abspath(os.path.join(out_dir, os.path.basename(img_ann['file_name'])))
         )
+
+        if progress_callback:
+            progress_callback()
 
 def dataset_info(
     ann_path: str,
