@@ -2,10 +2,62 @@
 '''
 
 import os
-import shutil
 import sys
+from enum import Enum
+import tqdm
+class InputType(Enum):
+    '''InputType
+    '''
+    Dataset = 0
+    AnnotationsAndImages = 1
 
-from ginjinn.utils import confirmation_cancel
+def process_input(
+    image_dir: str,
+    ann_path: str,
+    dataset_dir: str,
+) -> InputType:
+    '''process_input
+
+    Exits on invalid input.
+
+    Parameters
+    ----------
+    image_dir : str
+        image_dir commandline argument
+    ann_path : str
+        ann_path commandline argument
+    dataset_dir : str
+        dataset_dir commandline argument
+
+    Returns
+    -------
+    InputType
+        Type of provided input
+    '''
+
+    if dataset_dir is not None:
+        warn_msgs = []
+        if ann_path is not None:
+            warn_msgs.append(
+                'WARNING: -I/--dataset_dir was provided. -a/--ann_path will be ignored.'
+            )
+        if image_dir is not None:
+            warn_msgs.append(
+                'WARNING: -I/--dataset_dir was provided. -i/--image_dir will be ignored.'
+            )
+        if len(warn_msgs) > 0:
+            print('\n'.join(warn_msgs))
+        return InputType.Dataset
+
+    elif ann_path is not None and image_dir is not None:
+        return InputType.AnnotationsAndImages
+
+    else:
+        print(
+            'ERROR: invalid input arguments. Provide either -I/--datset_dir, '
+            'or -i/--image_dir and -a/--ann_path.'
+        )
+        sys.exit(1)
 
 def ginjinn_visualize(args):
     '''visualize
@@ -18,44 +70,77 @@ def ginjinn_visualize(args):
         Parsed GinJinn commandline arguments for the ginjinn visualize.
     '''
 
-    from ginjinn.utils.utils import visualize_annotations
-
-    if os.path.exists(args.out_dir):
-        msg = f'Directory "{args.out_dir} already exists. Should it be overwritten?"\n' +\
-            f'WARNING: This will remove "{args.out_dir}" and ALL SUBDIRECTORIES.\n'
-        should_remove = confirmation_cancel(msg)
-        if should_remove:
-            shutil.rmtree(args.out_dir)
-            os.mkdir(args.out_dir)
-    else:
-        os.mkdir(args.out_dir)
-
-    from ginjinn.utils.utils import find_img_dir, ImageDirNotFound, get_anntype
-
+    dataset_dir = args.dataset_dir
+    image_dir = args.image_dir
     ann_path = args.ann_path
-    ann_type = args.ann_type
-    img_dir = args.img_dir
+    input_type = process_input(image_dir, ann_path, dataset_dir)
 
-    if not img_dir:
-        try:
-            img_dir = find_img_dir(ann_path)
-        except ImageDirNotFound:
-            print(
-                f'ERROR: could not find "images" folder as sibling of "{ann_path}". Make sure ' +\
-                f'there is an "images" folder in the same directory as "{ann_path}" or ' +\
-                'explicitly pass "--img_dir".'
-            )
-            sys.exit()
+    out_dir = args.out_dir
+    vis_type = args.vis_type
 
-    if ann_type == 'auto':
-        ann_type = get_anntype(ann_path)
-
-    visualize_annotations(
-        ann_path = ann_path,
-        img_dir = img_dir,
-        out_dir = args.out_dir,
-        ann_type = ann_type,
-        vis_type = args.vis_type,
+    from ginjinn.commandline.commandline_app.commandline_helpers import (
+        check_dataset_dir,
+        check_ann_path,
+        check_image_dir,
+        AnnotationType,
+        DatasetType,
+        prepare_out_dir,
     )
 
-    print(f'Visualizations written to "{args.out_dir}".')
+    # Dataset input
+    if input_type == InputType.Dataset:
+        ds_type, ann_type, _ = check_dataset_dir(dataset_dir)
+        if ds_type == DatasetType.split:
+            print('ERROR: split datasets are not supported.')
+            sys.exit(1)
+
+        image_dir = os.path.join(dataset_dir, 'images')
+        if ann_type == AnnotationType.COCO:
+            ann_path = os.path.join(dataset_dir, 'annotations.json')
+        elif ann_type == AnnotationType.COCO:
+            ann_path = os.path.join(dataset_dir, 'annotations')
+        if not out_dir:
+            out_dir = os.path.join(dataset_dir, 'visualization')
+
+    # Annotations and image input
+    elif input_type == InputType.AnnotationsAndImages:
+        check_image_dir(image_dir)
+        ann_type = check_ann_path(ann_path)
+
+        if not out_dir:
+            print(
+                'ERROR: -o/--out_dir is required when -a/--ann_path and -i/--image_dir '
+                'are provided.'
+            )
+            sys.exit(1)
+
+    # Should not get here
+    else:
+        print('ERROR: unknown input type.')
+        sys.exit(1)
+
+    if ann_type == AnnotationType.COCO:
+        ann_type = 'COCO'
+    elif ann_type == AnnotationType.PVOC:
+        ann_type = 'PVOC'
+    # Should not get here
+    else:
+        print('ERROR: unknown annotation type.')
+        sys.exit(1)
+
+    prepare_out_dir(out_dir)
+
+    from ginjinn.utils import get_image_files
+    from ginjinn.utils.utils import visualize_annotations
+    n_images = len(get_image_files(image_dir))
+    with tqdm.tqdm(total=n_images, desc='visualizing', unit='image') as pbar:
+        visualize_annotations(
+            ann_path=ann_path,
+            img_dir=image_dir,
+            out_dir=out_dir,
+            ann_type=ann_type,
+            vis_type=vis_type,
+            progress_callback=pbar.update,
+        )
+
+    print(f'Visualizations written to "{out_dir}".')
