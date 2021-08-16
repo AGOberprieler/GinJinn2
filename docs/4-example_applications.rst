@@ -531,7 +531,7 @@ Here, we will crop the leaf bounding boxes with a border (padding) of 25 pixels 
 
 .. code-block:: BASH
     
-    ginjinn utils crop -I leucanthemum_split -o leucanthemum_split_cropped -p 25
+    ginjinn utils crop -I leucanthemum_split -o leucanthemum_split_cropped -p 25 -t segmentation
 
 Model training
 """"""""""""""
@@ -613,7 +613,7 @@ Model training
 
        .. code-block:: BASH
     
-            ginjinn predict leucanthemum_seg -i leucanthemum_split_cropped/test/images -o leucanthemum_seg_test_prediction -v -c -r
+            ginjinn predict leucanthemum_seg -i leucanthemum_split_cropped/test/images -o leucanthemum_seg_test_prediction_refined -v -c -r
 
        The new predictions should look much better.
 
@@ -621,4 +621,39 @@ Making predictions
 ^^^^^^^^^^^^^^^^^^
 
 With both models trained, we can now run the leaf extraction pipeline.
+To predict on new data, the following steps are required:
 
+    1) Split new images into sliding windows
+    2) Predict from BBox Model to get leaf bounding boxes
+    3) Predict from Seg. Model on bounding boxes
+
+.. image:: images/leucanthemum_prediction.png
+    :alt: Leucanthemum prediction workflow.
+
+For demonstration purposes, we will pretend that the test images are newly collected images.
+
+.. code-block:: BASH
+
+    cp -r leucanthemum_split/test/images new_images
+
+First, the new images need to be split into sliding windows.
+Size (:code:`-s 2048`) and overlap (:code:`-p 512`) should be same as for the training data.
+
+.. code-block:: BASH
+    
+    ginjinn utils sw_split -i new_images -o new_data_sw -s 2048 -p 512
+
+Now, we predict the bounding boxes of the leaves using the BBox Model.
+We will also add some padding (:code:`-p 25`), since we did the same when cropping the training images for Seg. Model.
+
+.. code-block:: BASH
+    
+    ginjinn predict leucanthemum_bbox -i new_data_sw -o new_data_sw_pred -v -c -p 25
+
+Finally, we can use the cropped bounding boxes as input for the Seg. Model.
+
+.. code-block:: BASH
+    
+    ginjinn predict leucanthemum_seg -i new_data_sw_pred/images_cropped/ -o new_data_seg_pred -v -c -r
+
+The predicted leaf masks (:code:`new_data_seg_pred/masks_cropped`) can now be used to, for example, quantify the leaf shape using geometrics morphometrics.
