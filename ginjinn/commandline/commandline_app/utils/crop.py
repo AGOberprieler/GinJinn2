@@ -60,6 +60,59 @@ def process_input(
         )
         sys.exit(1)
 
+def crop(
+    ann_path: str,
+    image_dir: str,
+    out_dir: str,
+    padding: int,
+    cropping_type: str,
+):
+    '''crop
+
+    Crop annotations. Can exit.
+
+    Parameters
+    ----------
+    ann_path : str
+        Annotation path.
+    image_dir : str
+        Image directory.
+    out_dir : str
+        Output directory.
+    padding : int
+        Padding.
+    cropping_type : str
+        Cropping type.
+    '''
+    from ginjinn.utils import crop_seg_from_coco
+    from ginjinn.utils import crop_bbox_from_coco
+    from ginjinn.commandline.commandline_app.commandline_helpers import (
+        get_n_annotations
+    )
+
+    n_ann = get_n_annotations(ann_path)
+    if cropping_type == 'segmentation':
+        with tqdm.tqdm(total=n_ann, desc='cropping', unit='ann') as pbar:
+            crop_seg_from_coco(
+                ann_file=ann_path,
+                img_dir=image_dir,
+                outdir=out_dir,
+                padding=padding,
+                progress_callback=pbar.update,
+            )
+    elif cropping_type == 'bbox':
+        with tqdm.tqdm(total=n_ann, desc='cropping', unit='ann') as pbar:
+            crop_bbox_from_coco(
+                ann_file=ann_path,
+                img_dir=image_dir,
+                outdir=out_dir,
+                padding=padding,
+                progress_callback=pbar.update,
+            )
+    else:
+        print(f'ERROR: unknown cropping type "{cropping_type}"')
+        sys.exit(1)
+
 def utils_crop(args):
     '''utils_crop
 
@@ -74,7 +127,6 @@ def utils_crop(args):
 
     from ginjinn.utils import crop_seg_from_coco
     from ginjinn.utils import crop_bbox_from_coco
-    from ginjinn.utils.utils import find_img_dir, ImageDirNotFound
 
     dataset_dir = args.dataset_dir
     image_dir = args.image_dir
@@ -97,17 +149,48 @@ def utils_crop(args):
 
     # Dataset input
     if input_type == InputType.Dataset:
-        ds_type, ann_type, _ = check_dataset_dir(dataset_dir)
-        if ds_type == DatasetType.split:
-            print('ERROR: split datasets are not supported.')
-            sys.exit(1)
+        ds_type, ann_type, splits = check_dataset_dir(dataset_dir)
 
         if ann_type == AnnotationType.PVOC:
             print('ERROR: PVOC datasets are not supported.')
             sys.exit(1)
 
-        ann_path = os.path.join(dataset_dir, 'annotations.json')
-        image_dir = os.path.join(dataset_dir, 'images')
+        # Split dataset input
+        if ds_type == DatasetType.split:
+            prepare_out_dir(out_dir)
+            for split in splits:
+                split_dir = os.path.join(dataset_dir, split)
+                ann_path = os.path.join(split_dir, 'annotations.json')
+                image_dir = os.path.join(split_dir, 'images')
+                split_out_dir = os.path.join(out_dir, split)
+                print(f'Cropping dataset {split_dir}:')
+                crop(
+                    ann_path,
+                    image_dir,
+                    split_out_dir,
+                    padding,
+                    cropping_type,
+                )
+            print(
+                f'Cropped split dataset written to "{out_dir}".'
+            )
+
+        # Simple dataset input
+        else:
+            ann_path = os.path.join(dataset_dir, 'annotations.json')
+            image_dir = os.path.join(dataset_dir, 'images')
+
+            prepare_out_dir(out_dir)
+            crop(
+                ann_path,
+                image_dir,
+                out_dir,
+                padding,
+                cropping_type,
+            )
+            print(
+                f'Cropped dataset written to "{out_dir}".'
+            )
 
     # Annotations and images input
     else:
@@ -117,31 +200,14 @@ def utils_crop(args):
             print('ERROR: PVOC annotations are not supported.')
             sys.exit(1)
 
-    prepare_out_dir(out_dir)
-
-    n_ann = get_n_annotations(ann_path)
-    if cropping_type == 'segmentation':
-        with tqdm.tqdm(total=n_ann, desc='cropping', unit='ann') as pbar:
-            crop_seg_from_coco(
-                ann_file=ann_path,
-                img_dir=image_dir,
-                outdir=out_dir,
-                padding=padding,
-                progress_callback=pbar.update,
-            )
-    elif cropping_type == 'bbox':
-        with tqdm.tqdm(total=n_ann, desc='cropping', unit='ann') as pbar:
-            crop_bbox_from_coco(
-                ann_file=ann_path,
-                img_dir=image_dir,
-                outdir=out_dir,
-                padding=padding,
-                progress_callback=pbar.update,
-            )
-    else:
-        print(f'ERROR: unknown cropping type "{args.type}"')
-        sys.exit(1)
-
-    print(
-        f'Cropped dataset written to "{out_dir}".'
-    )
+        prepare_out_dir(out_dir)
+        crop(
+            ann_path,
+            image_dir,
+            out_dir,
+            padding,
+            cropping_type,
+        )
+        print(
+            f'Cropped dataset written to "{out_dir}".'
+        )
