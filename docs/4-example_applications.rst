@@ -43,7 +43,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
    .. code-block:: BASH
 
-        ginjinn utils flatten -i PATH_TO_SEEDS_DS -o seeds_flat
+        ginjinn utils flatten -i PATH_TO_SEEDS_DS/images -a PATH_TO_SEEDS_DS/annotations.json -o seeds_flat
 
 3. Train-Validation-Test split:
 
@@ -57,7 +57,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
    .. code-block:: BASH
 
-        ginjinn split -a seeds_flat/annotations.json -o seeds_split -d bbox-detection -t 0.2 -v 0.2
+        ginjinn split -I seeds_flat -o seeds_split -d bbox-detection -t 0.2 -v 0.2
 
 Now the dataset is ready to be used for modeling with GinJinn2.
 
@@ -145,14 +145,14 @@ Model fitting
 Prediction and counting
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-New, we can use the trained model to predict bounding-boxes and genus on new data.
+Now, we can use the trained model to predict bounding-boxes and genus on new data.
 As stand-in for new data, we will use the previously generated test dataset.
 The :code:`ginjinn predict` command is used for this purpose.
-We will also turn on the visualization option (:code:`-s visualization`) , the get a visual representation of the prediction.
+We will also turn on the visualization option (:code:`-v`) , the get a visual representation of the prediction.
 
 .. code-block:: BASH
 
-    ginjinn predict seeds_project -i seeds_split/test/images -o seeds_test_prediction -s visualization 
+    ginjinn predict seeds_project -i seeds_split/test/images -o seeds_test_prediction -v
 
 This will generate a COCO dataset at :code:`seeds_test_prediction`.
 This dataset can be used as an input for all other GinJinn2 commands expecting COCO input.
@@ -162,7 +162,7 @@ Finally, we will use the :code:`ginjinn utils count` command to count the number
 
 .. code-block:: BASH
 
-    ginjinn count -a seeds_test_prediction/annotations.json -o seeds_test_prediction/counts.csv
+    ginjinn utils count -a seeds_test_prediction/annotations.json -o seeds_test_prediction/counts.csv
 
 This will write the image-wise seed counts per species to the CSV file :code:`seeds_test_prediction/counts.csv`.
 Based on this file, the proportion of seeds can be calculated using any tool with CSV-reading capability (e.g. EXCEL, R, Python, ...).
@@ -195,13 +195,430 @@ An example image with overlayed annotation:
     :alt: Yellow-Stickytraps image with bounding-box annotations.
 
 
+General data preparation
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+First the dataset must be downloaded and prepared to be used as an input for GinJinn2.
+
+1. Download the data:
+   
+   The dataset in COCO format is available from GFBio at `not yet available <#>`_.
+   
+   Download and unzip from the commandline:
+
+   .. code-block:: BASH
+
+        wget DOWNLOAD_LINK
+        unzip DATASET.zip
+
+2. Flatten the COCO dataset:
+
+    Make sure all images are in the same root directory:
+
+   .. code-block:: BASH
+
+        ginjinn utils flatten -i PATH_TO_DATASET/images -a PATH_TO_DATASET/annotations.json -o stickytraps_flat
+
+3. Train-Validation-Test split:
+
+   We split the seeds dataset into train (60%), test (20%), and validation (20%).
+   For this dataset, it might be necessary to try different split proposals until the category proportions are right.
+
+   .. code-block:: BASH
+
+        ginjinn split -I stickytraps_flat -o stickytraps_split -d bbox-detection -t 0.2 -v 0.2
+
+
+Slinding window splitting
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We will now apply sliding window splitting to be able to detect the small insects in the relatively large glue traps.
+For an introduction to sliding window splitting are described in `not yet available <#>`_.
+The following command will split the original images into sliding windows of 1024x1024 pixels in size (:code:`-s 1024`)
+with an overlap of 256 pixels (:code:`-p 256`) between neighboring sliding windows.
+Annotations that are incomplete after the splitting, i.e. "cut-off" polygons, will be excluded (:code:`-c`).
+The sliding window split should be done in context of bounding box model (:code:`-k bbox-detection`).
+
+.. code-block:: BASH
+
+    ginjinn utils sw_split -I stickytraps_split -o stickytraps_split_sw -s 1024 -p 256 -k bbox-detection -c
+
+Model fitting
+^^^^^^^^^^^^^
+    
+ 1. Generate new GinJinn2 project:
+ 
+    First, we need to generate new GinJinn2 project using the :code:`ginjinn new` command.
+    You can provide a model template (:code:`-t`), and a data directory (:code:`-d`) to this command.
+    Here, we will use a Faster R-CNN as detection model, and the previously generated split dataset as data directory.
+ 
+    .. code-block:: BASH
+ 
+         ginjinn new stickytraps_project -t faster_rcnn_R_101_FPN_3x.yaml -d stickytraps_split_sw
+     
+    This will create the folder :code:`stickytraps_project`, containing a :code:`ginjinn_config.yaml` configuration file and an :code:`outputs` folder for modeling outputs.
+ 
+ 2. Modify project configuration:
+    
+    Now, we will modify the number of training iterations, the evaluation period, and the checkpointing period.
+    Additionally, we will add several data augmentation options.
+    Augmentations are somewhat random data transformations (e.g. rotation, contrast adaption, ...) that are applied to the images and annotations prior to training.
+    By applying these transformations, the dataset is artifically enlarged and made more variable, which very often leads to better model performance on new data.
+ 
+    In :code:`ginjinn_config.yaml` we will set the entries:
+ 
+    .. code-block:: YAML
+ 
+         # ...
+         training:
+             # ...
+             max_iter: 7000
+             eval_period: 250
+             checkpoint_period: 1000
+         # ...
+         augmentation:
+            - horizontal_flip:
+                probability: 0.25
+            - vertical_flip:
+                probability: 0.25
+            - brightness:
+                brightness_min: 0.8
+                brightness_max: 1.2
+                probability: 0.25
+            - contrast:
+                contrast_min: 0.8
+                contrast_max: 1.2
+                probability: 0.25
+            - saturation:
+                saturation_min: 0.8
+                saturation_max: 1.2
+                probability: 0.25
+            - rotation_range:
+                angle_min: -30
+                angle_max: 30
+                expand: True
+                probability: 0.25
+     
+    The project is now ready for training.
+ 
+ 3. Train and validate model
+ 
+    Model training is started via:
+ 
+    .. code-block:: BASH
+ 
+         ginjinn train stickytraps_project
+ 
+    While the model is running, several files will be generated in the :code:`stickytraps_project/outputs` directory.
+    The file :code:`stickytraps_project/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
+ 
+ 4. Evaluate trained model
+ 
+    After training, the model can be evaluated using the test dataset by calling the :code:`ginjinn evaluate` command:
+ 
+    .. code-block:: BASH
+ 
+         ginjinn evaluate stickytraps_project
+ 
+    This will write the evaluation output to :code:`stickytraps_project/evaluation.csv`.
+    If there is a large discrepancy between the final validation metrics (see :code:`stickytraps_project/outputs/metrics.pdf` or :code:`metrics.json`) and the evluation output, there is most likely a problem with the model.
+
+Prediction and counting
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Now, we can use the trained model to predict bounding-boxes and insect categories on new data.
+As stand-in for new data, we will use the previously generated test dataset.
+The :code:`ginjinn predict` command is used for this purpose.
+We will also turn on the visualization option (:code:`-v`) , the get a visual representation of the prediction.
+
+.. code-block:: BASH
+
+    ginjinn predict stickytraps_project -i stickytraps_split_sw/test/images -o stickytraps_test_prediction -v
+
+This will generate a COCO dataset (sans original images) at :code:`stickytraps_test_prediction`.
+This dataset can be used as an input for all other GinJinn2 commands expecting COCO input.
+The visualizations are written to :code:`stickytraps_test_prediction/visualization`.
+
+Before we can count the insects, we first to remove duplicate detections.
+A duplicate detection occurs, when an object is present in two or more sliding windows, and is successfully detected in more than one of them.
+We will use :code:`ginjinn utils sw_merge` to combine the sliding window predictions, and reconstruct the orignal input image; this will automatically remove duplicate predictions.
+The following command merges the sliding window images (:code:`-i stickytraps_split/test/images`) and annotations (:code:`-a stickytraps_test_prediction/annotations.json`),
+and saves the merged images and annotations to :code:`stickytraps_test_prediction_merged` (:code:`-o`).
+
+.. code-block:: BASH
+
+    ginjinn utils sw_merge -i stickytraps_split_sw/test/images -a stickytraps_test_prediction/annotations.json -o stickytraps_test_prediction_merged -t bbox-detection
+
+If you want to have a look at the prediction, the results can be visualized using :code:`ginjinn vis -I stickytraps_test_prediction_merged -v bbox`.
+
+Now that duplicate predictions are removed, we can count the insects:
+
+.. code-block:: BASH
+
+    ginjinn utils count -a stickytraps_test_prediction_merged/annotations.json -o stickytraps_test_prediction_merged/counts.csv
+
+This will write the image-wise insects counts to the CSV file :code:`stickytraps_test_prediction_merged/counts.csv`.
+The file can be processed using any tool with CSV-reading capability (e.g. EXCEL, R, Python, ...).
+
+
 The *Leucanthemum* Dataset
 --------------------------
 
-TODO
+The *Leucanthemum* dataset comprises digital images of herbarium specimens from 12 *Leucanthemum* species.
+There is only one object category "leaf", which denotes intact leaves that might be used to quantify leaf shape for, e.g., geometric morphometrics.
+To be able to train a segmentation model for pixel perfect detection, the leaves are annotated using polygons.
 
 An example image with overlayed annotation (original images are color images, the image is shown in grayscale to emphasize the annotations):
 
 .. image:: images/leucanthemum_ann_0.jpg
     :alt: Leucanthemum image with instance-segmentation annotations.
+
+For this dataset, we will build a pipeline to facilitate automatic feature extraction from digitized herbarium specimens.
+Similar to the Yellow-Stickytrap dataset, there are some potential problems concerning the data:
+
+1) the objects (leaves) are small in relation to the image size
+2) the images are very large (~4000x6000 pixels)
+3) the objects (leaves) are very variable (basal vs. apical leaves) 
+
+Problem 3) could potentially be solved by subdiving the leaf category into subcategories for, e.g., apical, intermediate, and basal leaves.
+This, however, would potentially required a larger amount of training data to account for the now smaller number of samples per category.
+We will concentrate on solving problems 1) and 2) by applying a custom pipeline consisting of two models:
+The first model, from now on called BBox Model, will be trained to detect the bounding boxes of intact leaves in sliding-window crops of the original images.
+The second model, from now on called Segmentation Model (Seg. Model), will segment the leaves within the bounding boxes.
+
+The pipeline will look like this:
+
+.. image:: images/leucanthemum_workflow.png
+    :alt: Leucanthemum leaf segmentation pipeline.
+
+
+Data preparation
+^^^^^^^^^^^^^^^^
+
+First the dataset must be downloaded and prepared to be used as an input for GinJinn2.
+
+1. Download the data:
+   
+   The dataset in COCO format is available from GFBio at `not yet available <#>`_.
+   
+   Download and unzip from the commandline:
+
+   .. code-block:: BASH
+
+        wget DOWNLOAD_LINK
+        unzip DATASET_PATH
+
+2. Flatten the COCO dataset:
+   
+   GinJinn2 expects all images to be placed directly in the folder :code:`images` within the dataset folder an as a sibling of the annotations (:code:`annotations.json` for COCO or :code:`annotaitons` folder for Pascal-VOC).
+   To transform any valid COCO dataset into a flat COCO dataset, GinJinn2 provides the :code:`ginjinn utils flatten` command.
+
+   To flatten the seeds dataset:
+
+   .. code-block:: BASH
+
+        ginjinn utils flatten -i DATASET_PATH/images -a DATASET_PATH/annotations.json -o leucanthemum_flat
+
+3. Train-Validation-Test split:
+
+   It is a good practice in Machine Learning (ML) to split the dataset into sub-datasets for training, validation, and testing.
+   This is necessary to be able to assess the performance of a trained ML on unseen data.
+   The general idea is to use the training dataset for model training, and the validation (sometimes called "development") dataset for hyper-parameter tuning, and finally the test dataset as a proxy for real-world performance of the model.
+   For this purpose, GinJinn2 provides the :code:`ginjinn split` command.
+   This command uses a heuristic to stratify the split on the object level.
+
+   To split the seeds dataset into train (60%), test (20%), and validation (20%):
+
+   .. code-block:: BASH
+
+        ginjinn split -I leucanthemum_flat -o leucanthemum_split -d instance-segmentation -t 0.2 -v 0.2
+
+Bounding Box Model
+^^^^^^^^^^^^^^^^^^
+
+Sliding window splitting
+""""""""""""""""""""""""
+
+Similar to the Yellow-Stickytraps analysis, we will split the dataset into sliding windows.
+This time, however, we will use larger windows (:code:`-s 2048`) with a larger overlap (:code:`-p 512`):
+
+.. code-block:: BASH
+
+    ginjinn utils sw_split -I leucanthemum_split -o leucanthemum_split_sw -s 2048 -p 512 -c
+
+The sliding windows will be used to train the detection model.
+
+Model training
+""""""""""""""
+
+    1. Generate new GinJinn2 project:
+    
+       .. code-block:: BASH
+    
+            ginjinn new leucanthemum_bbox -t faster_rcnn_R_101_FPN_3x.yaml -d leucanthemum_split_sw
+        
+    2. Modify project configuration:
+
+       In :code:`leucanthemum_bbox/ginjinn_config.yaml` we will set the entries:
+    
+       .. code-block:: YAML
+    
+            # ...
+            training:
+                # ...
+                max_iter: 5000
+                eval_period: 250
+                checkpoint_period: 2500
+            # ...
+            augmentation:
+               - horizontal_flip:
+                   probability: 0.25
+               - vertical_flip:
+                   probability: 0.25
+               - brightness:
+                   brightness_min: 0.8
+                   brightness_max: 1.2
+                   probability: 0.25
+               - contrast:
+                   contrast_min: 0.8
+                   contrast_max: 1.2
+                   probability: 0.25
+               - saturation:
+                   saturation_min: 0.8
+                   saturation_max: 1.2
+                   probability: 0.25
+               - rotation_range:
+                   angle_min: -30
+                   angle_max: 30
+                   expand: True
+                   probability: 0.25
+        
+    3. Train and validate model
+    
+       Model training is started via:
+    
+       .. code-block:: BASH
+    
+            ginjinn train leucanthemum_bbox
+    
+       While the model is running, several files will be generated in the :code:`leucanthemum_bbox/outputs` directory.
+       The file :code:`leucanthemum_bbox/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
+    
+    4. Evaluate trained model
+    
+       .. code-block:: BASH
+    
+            ginjinn evaluate leucanthemum_bbox
+    
+       This will write the evaluation output to :code:`leucanthemum_bbox/evaluation.csv`.
+       If there is a large discrepancy between the final validation metrics (see :code:`leucanthemum_bbox/outputs/metrics.pdf` or :code:`metrics.json`) and the evaluation output, there is most likely a problem with the model.
+
+    5. (Optional) Prediction, merging, visualization.
+
+       See :code:`ginjinn predict`, :code:`ginjinn utils sw_merge`, :code:`ginjinn visualize` documentation or Yellow-Stickytraps.
+
+Segmentation Model
+^^^^^^^^^^^^^^^^^^
+
+Bounding box cropping
+"""""""""""""""""""""
+
+To train a model to extract leaves pixel perfectly from leaf bounding boxes, we will need to process the *Leucanthemum* dataset.
+Ginjinn provides the :code:`ginjinn utils crop` command, which crops bounding boxes or polygons from annotated images, and generates a new annotation referring to
+the cropped images.
+The cropped images can then be used for model training.
+Here, we will crop the leaf bounding boxes with a border (padding) of 25 pixels (:code:`-p 25`) to account for some variation in the bounding boxes.
+
+.. code-block:: BASH
+    
+    ginjinn utils crop -I leucanthemum_split -o leucanthemum_split_cropped -p 25
+
+Model training
+""""""""""""""
+
+    1. Generate new GinJinn2 project:
+    
+       .. code-block:: BASH
+    
+            ginjinn new leucanthemum_seg -t mask_rcnn_R_101_FPN_3x.yaml -d leucanthemum_split_cropped
+        
+    2. Modify project configuration:
+
+       In :code:`leucanthemum_seg/ginjinn_config.yaml` we will set the entries:
+    
+       .. code-block:: YAML
+    
+            # ...
+            training:
+                # ...
+                max_iter: 5000
+                eval_period: 250
+                checkpoint_period: 2500
+            # ...
+            augmentation:
+               - horizontal_flip:
+                   probability: 0.25
+               - vertical_flip:
+                   probability: 0.25
+               - brightness:
+                   brightness_min: 0.8
+                   brightness_max: 1.2
+                   probability: 0.25
+               - contrast:
+                   contrast_min: 0.8
+                   contrast_max: 1.2
+                   probability: 0.25
+               - saturation:
+                   saturation_min: 0.8
+                   saturation_max: 1.2
+                   probability: 0.25
+               - rotation_range:
+                   angle_min: -30
+                   angle_max: 30
+                   expand: True
+                   probability: 0.25
+
+    3. Train and validate model
+    
+       Model training is started via:
+    
+       .. code-block:: BASH
+    
+            ginjinn train leucanthemum_seg
+    
+       While the model is running, several files will be generated in the :code:`leucanthemum_seg/outputs` directory.
+       The file :code:`leucanthemum_seg/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
+    
+    4. Evaluate trained model
+    
+       .. code-block:: BASH
+    
+            ginjinn evaluate leucanthemum_seg
+    
+       This will write the evaluation output to :code:`leucanthemum_seg/evaluation.csv`.
+       If there is a large discrepancy between the final validation metrics (see :code:`leucanthemum_seg/outputs/metrics.pdf` or :code:`metrics.json`) and the evaluation output, there is most likely a problem with the model.
+
+    5. (Optional) Predict and visualize
+
+       We might be interested in how the model predictions look like:
+
+       .. code-block:: BASH
+    
+            ginjinn predict leucanthemum_seg -i leucanthemum_split_cropped/test/images -o leucanthemum_seg_test_prediction -v -c
+
+       The predictions will probably not look very convincing right now.
+       To improve the segmentations, we can make use of the segmentation refinement option (:code:`-r`) of the :code:`ginjinn predict` command.
+       This will use CascadePSP for improving the segmentations.
+       This refinement is only possible, when object borders are relatively pronounced.
+
+       .. code-block:: BASH
+    
+            ginjinn predict leucanthemum_seg -i leucanthemum_split_cropped/test/images -o leucanthemum_seg_test_prediction -v -c -r
+
+       The new predictions should look much better.
+
+Making predictions
+^^^^^^^^^^^^^^^^^^
+
+With both models trained, we can now run the leaf extraction pipeline.
 
