@@ -34,7 +34,7 @@ def setup_crop_parser(subparsers):
 
             |RInput can be specified by providing one of either -I/--dataset_dir, or -a/--ann_path AND
             -i/--image_dir.
-            |R|RIf -I/--dataset_dir is provided, this command will expect a simple COCO dataset.
+            |R|RIf -I/--dataset_dir is provided, this command will expect a simple or split COCO dataset.
             |RExample: ginjinn utils crop -I my_dataset -o my_dataset_cropped -t bbox
 
             |R|RIf -a/--ann_path and -i/--image_dir are provided, objects in the COCO annotations file will be cropped
@@ -70,7 +70,11 @@ def setup_crop_parser(subparsers):
         '-I', '--dataset_dir',
         type = str,
         help = '''
+<<<<<<< HEAD
             COCO dataset directory.
+=======
+            Simple or split COCO dataset directory.
+>>>>>>> cli-refactoring
         ''',
         required=False,
     )

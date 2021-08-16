@@ -60,64 +60,35 @@ def process_input(
         )
         sys.exit(1)
 
-def utils_crop(args):
-    '''utils_crop
+def crop(
+    ann_path: str,
+    image_dir: str,
+    out_dir: str,
+    padding: int,
+    cropping_type: str,
+):
+    '''crop
 
-    GinJinn utils crop command.
+    Crop annotations. Can exit.
 
     Parameters
     ----------
-    args
-        Parsed GinJinn commandline arguments for the ginjinn utils crop
-        subcommand.
+    ann_path : str
+        Annotation path.
+    image_dir : str
+        Image directory.
+    out_dir : str
+        Output directory.
+    padding : int
+        Padding.
+    cropping_type : str
+        Cropping type.
     '''
-
     from ginjinn.utils import crop_seg_from_coco
     from ginjinn.utils import crop_bbox_from_coco
-    from ginjinn.utils.utils import find_img_dir, ImageDirNotFound
-
-    dataset_dir = args.dataset_dir
-    image_dir = args.image_dir
-    ann_path = args.ann_path
-    input_type = process_input(image_dir, ann_path, dataset_dir)
-
-    out_dir = args.out_dir
-    padding = args.padding
-    cropping_type = args.cropping_type
-
     from ginjinn.commandline.commandline_app.commandline_helpers import (
-        check_dataset_dir,
-        check_ann_path,
-        check_image_dir,
-        DatasetType,
-        AnnotationType,
-        prepare_out_dir,
-        get_n_annotations,
+        get_n_annotations
     )
-
-    # Dataset input
-    if input_type == InputType.Dataset:
-        ds_type, ann_type, _ = check_dataset_dir(dataset_dir)
-        if ds_type == DatasetType.split:
-            print('ERROR: split datasets are not supported.')
-            sys.exit(1)
-
-        if ann_type == AnnotationType.PVOC:
-            print('ERROR: PVOC datasets are not supported.')
-            sys.exit(1)
-
-        ann_path = os.path.join(dataset_dir, 'annotations.json')
-        image_dir = os.path.join(dataset_dir, 'images')
-
-    # Annotations and images input
-    else:
-        check_image_dir(image_dir)
-        ann_type = check_ann_path(ann_path)
-        if ann_type == AnnotationType.PVOC:
-            print('ERROR: PVOC annotations are not supported.')
-            sys.exit(1)
-
-    prepare_out_dir(out_dir)
 
     n_ann = get_n_annotations(ann_path)
     if cropping_type == 'segmentation':
@@ -139,9 +110,100 @@ def utils_crop(args):
                 progress_callback=pbar.update,
             )
     else:
-        print(f'ERROR: unknown cropping type "{args.type}"')
+        print(f'ERROR: unknown cropping type "{cropping_type}"')
         sys.exit(1)
 
-    print(
-        f'Cropped dataset written to "{out_dir}".'
+def utils_crop(args):
+    '''utils_crop
+
+    GinJinn utils crop command.
+
+    Parameters
+    ----------
+    args
+        Parsed GinJinn commandline arguments for the ginjinn utils crop
+        subcommand.
+    '''
+
+    dataset_dir = args.dataset_dir
+    image_dir = args.image_dir
+    ann_path = args.ann_path
+    input_type = process_input(image_dir, ann_path, dataset_dir)
+
+    out_dir = args.out_dir
+    padding = args.padding
+    cropping_type = args.cropping_type
+
+    from ginjinn.commandline.commandline_app.commandline_helpers import (
+        check_dataset_dir,
+        check_ann_path,
+        check_image_dir,
+        DatasetType,
+        AnnotationType,
+        prepare_out_dir,
     )
+
+    # Dataset input
+    if input_type == InputType.Dataset:
+        ds_type, ann_type, splits = check_dataset_dir(dataset_dir)
+
+        if ann_type == AnnotationType.PVOC:
+            print('ERROR: PVOC datasets are not supported.')
+            sys.exit(1)
+
+        # Split dataset input
+        if ds_type == DatasetType.split:
+            prepare_out_dir(out_dir)
+            for split in splits:
+                split_dir = os.path.join(dataset_dir, split)
+                ann_path = os.path.join(split_dir, 'annotations.json')
+                image_dir = os.path.join(split_dir, 'images')
+                split_out_dir = os.path.join(out_dir, split)
+                print(f'Cropping dataset {split_dir}:')
+                crop(
+                    ann_path,
+                    image_dir,
+                    split_out_dir,
+                    padding,
+                    cropping_type,
+                )
+            print(
+                f'Cropped split dataset written to "{out_dir}".'
+            )
+
+        # Simple dataset input
+        else:
+            ann_path = os.path.join(dataset_dir, 'annotations.json')
+            image_dir = os.path.join(dataset_dir, 'images')
+
+            prepare_out_dir(out_dir)
+            crop(
+                ann_path,
+                image_dir,
+                out_dir,
+                padding,
+                cropping_type,
+            )
+            print(
+                f'Cropped dataset written to "{out_dir}".'
+            )
+
+    # Annotations and images input
+    else:
+        check_image_dir(image_dir)
+        ann_type = check_ann_path(ann_path)
+        if ann_type == AnnotationType.PVOC:
+            print('ERROR: PVOC annotations are not supported.')
+            sys.exit(1)
+
+        prepare_out_dir(out_dir)
+        crop(
+            ann_path,
+            image_dir,
+            out_dir,
+            padding,
+            cropping_type,
+        )
+        print(
+            f'Cropped dataset written to "{out_dir}".'
+        )
