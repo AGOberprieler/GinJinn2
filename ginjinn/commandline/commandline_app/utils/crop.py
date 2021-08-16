@@ -125,9 +125,6 @@ def utils_crop(args):
         subcommand.
     '''
 
-    from ginjinn.utils import crop_seg_from_coco
-    from ginjinn.utils import crop_bbox_from_coco
-
     dataset_dir = args.dataset_dir
     image_dir = args.image_dir
     ann_path = args.ann_path
@@ -144,7 +141,6 @@ def utils_crop(args):
         DatasetType,
         AnnotationType,
         prepare_out_dir,
-        get_n_annotations,
     )
 
     # Dataset input
