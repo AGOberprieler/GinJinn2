@@ -87,7 +87,7 @@ The following command could be used to revert the train/validation/test split fr
 
 .. code-block:: bash
 
-    ginjinn utils filter_size \
+    ginjinn utils merge \
         -t COCO \
         -a shapes_ds_split/train/annotations.json \
         -a shapes_ds_split/val/annotations.json \
