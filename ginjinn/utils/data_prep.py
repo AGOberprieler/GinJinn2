@@ -126,9 +126,8 @@ def flatten_img_dir(
     progress_callback : Optional[Callable]
         Optional callback function for progress reporting.
     '''
-    out_img_dir = os.path.join(out_dir, 'images')
-    if not os.path.exists(out_img_dir):
-        os.makedirs(out_img_dir)
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
 
     id_map = {}
     i_img = 0
@@ -142,17 +141,17 @@ def flatten_img_dir(
             new_file_name = f'{i_img}{ext}'
             id_map[i_img] = path
         else:
-            new_file_name = path.replace('/', sep)
+            new_file_name = path[len(img_root_dir):].replace('/', sep)
 
         if link_images:
             os.link(
                 os.path.join(path),
-                os.path.join(out_img_dir, new_file_name)
+                os.path.join(out_dir, new_file_name)
             )
         else:
             shutil.copy(
                 os.path.join(path),
-                os.path.join(out_img_dir, new_file_name)
+                os.path.join(out_dir, new_file_name)
             )
 
         i_img += 1
