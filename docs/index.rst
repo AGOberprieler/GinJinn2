@@ -18,7 +18,7 @@ GinJinn2 provides a collection of command-line tools for bounding-box object det
    2-overview.rst
    3-getting_started.rst
    4-toolbox.rst
-   5-empirical_applications.rst
+   5-example_applications.rst
    6-project_configuration.rst
 
 
