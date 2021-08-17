@@ -219,14 +219,14 @@ In both cases, slashes in the original image paths are replaced by some reserved
     .. code-block:: none
                 
         images
-        ├── images_nested~Filago~aegaea~1.jpg
-        ├── images_nested~Filago~aegaea~2.jpg
-        ├── images_nested~Filago~cretensis~1.jpg
-        ├── images_nested~Filago~cretensis~2.jpg
-        ├── images_nested~Lifago~dielsii~1.jpg
-        ├── images_nested~Lifago~dielsii~2.jpg
-        ├── images_nested~Logfia~gallica~1.jpg
-        └── images_nested~Logfia~gallica~2.jpg
+        ├── Filago~aegaea~1.jpg
+        ├── Filago~aegaea~2.jpg
+        ├── Filago~cretensis~1.jpg
+        ├── Filago~cretensis~2.jpg
+        ├── Lifago~dielsii~1.jpg
+        ├── Lifago~dielsii~2.jpg
+        ├── Logfia~gallica~1.jpg
+        └── Logfia~gallica~2.jpg
 
 
 Sliding-Window Cropping
