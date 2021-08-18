@@ -10,7 +10,7 @@ import glob
 import os
 import xml
 import xml.etree.ElementTree as et
-from typing import Callable, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 import imantics
 import numpy as np
 from pycocotools import mask as pmask
@@ -250,6 +250,29 @@ def get_obj_anns(img_ann, ann: dict) -> List[dict]:
 
     obj_anns = [obj_ann for obj_ann in ann['annotations'] if obj_ann['image_id'] == img_id]
     return obj_anns
+
+def get_category_id(category: str, ann: dict) -> Optional[int]:
+    '''get_category_id
+
+    Get COCO category ID from category name.
+
+    Parameters
+    ----------
+    category : str
+        Category name
+    ann : dict
+        COCO annotation dictionary.
+
+    Returns
+    -------
+    Optional[int]
+        Category ID or None.
+    '''
+    for cat_entry in ann['categories']:
+        if cat_entry['name'] == category:
+            return cat_entry['id']
+        
+    return None
 
 def plot_coco_annotated_img(img, obj_anns: List[dict], ax=None):
     '''plot_coco_annotated_img
@@ -1131,3 +1154,73 @@ def get_dstype(data_dir: str) -> str:
         raise InvalidDatasetDir(msg)
 
     return ds_type
+
+def merge_categories(
+    ann_path: str,
+    out_path: str,
+    merge_options: Dict[str, Iterable[str]],
+):
+    '''merge_categories
+
+    Merge categories to a new category.
+
+    Parameters
+    ----------
+    ann_path : str
+        Path to annotation file (COCO) or folder (PVOC).
+    out_path : str
+        Path to new annotation file (COCO) or folder (PVOC).
+    merge_options : Dict[str, Iterable[str]]
+        Dictionary comprising the new category name(s) as key(s) and the
+        categories to be merged as corresponding value(s).
+
+    Raises
+    ------
+    Exception
+        Raised if unexpected error is encountered.
+    '''
+
+    ann_type = get_anntype(ann_path)
+    if ann_type == 'COCO':
+        ann = load_coco_ann(ann_path=ann_path)
+
+        for new_cat, old_cats in merge_options.items():
+            old_cat_ids = [get_category_id(cat, ann) for cat in old_cats]
+            new_id = min(old_cat_ids)
+
+            # update categories
+            ann['categories'] = [
+                cat_ann for cat_ann in ann['categories'] if not cat_ann['id'] in old_cat_ids
+            ]
+            ann['categories'].append({'id': new_id, 'supercategory': '', 'name': new_cat})
+
+            # update object annotations' categories
+            for obj_ann in ann['annotations']:
+                if obj_ann['category_id'] in old_cat_ids:
+                    obj_ann['category_id'] = new_id
+
+            with open(out_path, 'w') as ann_f:
+                json.dump(ann, ann_f, indent=2)
+
+    elif ann_type == 'PVOC':
+        if not os.path.exists(out_path):
+            os.mkdir(out_path)
+
+        ann_files = \
+            glob.glob(os.path.join(ann_path, '*.xml')) + \
+            glob.glob(os.path.join(ann_path, '*.XML'))
+
+        for ann_file in ann_files:
+            ann = load_pvoc_annotation(ann_file)
+
+            for name in ann.findall('object/name'):
+                for new_cat, old_cats in merge_options.items():
+                    if name.text in old_cats:
+                        name.text = new_cat
+
+            bname = os.path.basename(ann_file)
+            ann_fileout = os.path.join(out_path, bname)
+            write_pvoc_annotation(ann, ann_fileout)
+
+    else:
+        raise Exception('Unexpected error.')
