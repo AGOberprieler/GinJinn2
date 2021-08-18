@@ -3,6 +3,8 @@ Module for generic helper functions.
 """
 
 from collections import defaultdict
+import itertools
+import copy
 from enum import Enum
 import sys
 import json
@@ -1155,6 +1157,12 @@ def get_dstype(data_dir: str) -> str:
 
     return ds_type
 
+class UnknownCategoryError(Exception):
+    '''UnknownCategoryError'''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.category = args[0]
+
 def merge_categories(
     ann_path: str,
     out_path: str,
@@ -1176,6 +1184,8 @@ def merge_categories(
 
     Raises
     ------
+    UnknownCategoryError
+        Raised if an unknown category is passed as category to be merged.
     Exception
         Raised if unexpected error is encountered.
     '''
@@ -1183,24 +1193,48 @@ def merge_categories(
     ann_type = get_anntype(ann_path)
     if ann_type == 'COCO':
         ann = load_coco_ann(ann_path=ann_path)
+        cats = ann['categories']
 
+        # old_cat -> new_cat map
+        inverse_merge_map = {}
         for new_cat, old_cats in merge_options.items():
-            old_cat_ids = [get_category_id(cat, ann) for cat in old_cats]
-            new_id = min(old_cat_ids)
+            for oc in old_cats:
+                inverse_merge_map[oc] = new_cat
 
-            # update categories
-            ann['categories'] = [
-                cat_ann for cat_ann in ann['categories'] if not cat_ann['id'] in old_cat_ids
-            ]
-            ann['categories'].append({'id': new_id, 'supercategory': '', 'name': new_cat})
+        cat_names = [c['name'] for c in cats]
+        for oc_n in inverse_merge_map.keys():
+            if oc_n not in cat_names:
+                raise UnknownCategoryError(oc_n)
 
-            # update object annotations' categories
-            for obj_ann in ann['annotations']:
-                if obj_ann['category_id'] in old_cat_ids:
-                    obj_ann['category_id'] = new_id
+        # build new categories
+        cats_to_drop = list(itertools.chain(*[x for x in merge_options.values()]))
+        new_cats = \
+            [c for c in copy.deepcopy(cats) if not c['name'] in cats_to_drop] + \
+            [{'id': -1, 'supercategory': '', 'name': cn} for cn in merge_options.keys()]
+        new_cats = sorted(new_cats, key=lambda c: c['name'])
+        for i, c in enumerate(new_cats):
+            c['id'] = i + 1
+        ann['categories'] = new_cats
 
-            with open(out_path, 'w') as ann_f:
-                json.dump(ann, ann_f, indent=2)
+        # get mapping from old to new categories
+        cat_id_map = {c['name']: c['id'] for c in cats}
+        new_cat_id_map = {c['name']: c['id'] for c in new_cats}
+
+        old_to_new_map = {}
+        for oc in cats:
+            oc_n = oc['name']
+            oc_id = cat_id_map[oc_n]
+
+            nc_n = inverse_merge_map[oc_n] if oc_n in cats_to_drop else oc_n
+            nc_id = new_cat_id_map[nc_n]
+            old_to_new_map[oc_id] = nc_id
+
+        # update object annotations' categories
+        for obj_ann in ann['annotations']:
+            obj_ann['category_id'] = old_to_new_map[obj_ann['category_id']]
+
+        with open(out_path, 'w') as ann_f:
+            json.dump(ann, ann_f, indent=2)
 
     elif ann_type == 'PVOC':
         if not os.path.exists(out_path):
