@@ -3,14 +3,14 @@
 Toolbox
 =======
 
-The essential tools for working with `Detectron2 <https://github.com/facebookresearch/detectron2>`_'s object detection models, i.e. ``ginjinn new``, ``ginjinn train``, ``ginjinn evaluate``, and ``ginjinn predict``, have already been introduced under :doc:`Getting Started <3-getting_started>`.
+The essential tools for working with `Detectron2 <https://github.com/facebookresearch/detectron2>`_'s object detection models, i.e. ``ginjinn new``, ``ginjinn train``, ``ginjinn evaluate``, and ``ginjinn predict``, have already been introduced in :doc:`Getting Started <3-getting_started>`.
 Here, we give an overview over additional functionality provided by GinJinn2.
 For command-specific details, please also have a look at the corresponding help pages.
 
 Object Cropping
 ---------------
 
-Sometimes it is necessary to crop objects from the images on which they are annotated.
+Sometimes it is necessary to crop annotated objects from the corresponding images.
 GinJinn2 provides such functionality in two ways:
 
 #.  Arbitrary COCO datasets consisting of an annotation file and an image directory can be cropped using the ``ginjinn utils crop`` command. In this case, a new annotation file referring to the cropped sub-images will be created as well.
@@ -41,7 +41,7 @@ For the simulated dataset created in :ref:`Getting Started <3-getting_started_si
         -o shapes_ds_filtered \
         -f circle
 
-Here, ``-a shapes_ds/annotations.json`` denotes the annotation file to filtered while ``-o shapes_ds_filtered`` sets the output directory.
+Here, ``-a shapes_ds/annotations.json`` denotes the annotation file to be filtered while ``-o shapes_ds_filtered`` sets the output directory.
 To specify multiple categories, the ``-f`` option has to be used repeatedly (e.g. ``-f circle -f triangle``).
 ``-d/--drop`` would invert the default behavior and discard the specified categories instead of keeping them. 
 
@@ -77,7 +77,7 @@ NOTE: Since ``ginjinn utils filter_size`` is mainly intended for post-processing
 Dataset Merging
 ---------------
 
-``ginjinn utils merge`` allows two combine multiple datasets into a single new one.
+``ginjinn utils merge`` allows to combine multiple datasets into a single new one.
 There are two requirements for the datasets to be merged:
 
 #.  They have to be of the same annotation type, i.e. COCO or Pascal VOC.
@@ -261,10 +261,10 @@ Once predictions have been generated for sliding-window cropped data, it may be 
 This can be done with ``ginjinn utils sw_merge``, which reconstructs the original images along with object annotations based on annotated sub-images.
 
 The main criterion for merging objects from neighboring sub-images is their Intersection over Union (IoU) inside the window overlap.
-Simply spoken, we assess whether two objects occupy more or less the same pixels there.
-In case on instance segmentation, an IoU threshold alone may already be sufficient to obtain reasonable results.
+Simply spoken, we assess whether two objects occupy more or less the same pixels within this region.
+In case of instance segmentation, an IoU threshold alone may already be sufficient to obtain reasonable results.
 
-As we do not now the exact location of a non-segmented object inside a bounding box, bounding boxes are more difficult to merge.
+As we do not know the exact location of a non-segmented object inside a bounding box, bounding boxes are more difficult to merge.
 To mitigate this problem, the IoS ("Intersection over Smaller") can be used as an additional criterion.
 It allows to merge two objects if the smaller one is more or less enclosed by the other one.
 Here, we consider the objects as a whole rather than only regions inside the window overlap.
