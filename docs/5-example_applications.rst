@@ -409,7 +409,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
    GinJinn2 expects all images to be placed directly in the folder :code:`images` within the dataset folder an as a sibling of the annotations (:code:`annotations.json` for COCO or :code:`annotaitons` folder for Pascal-VOC).
    To transform any valid COCO dataset into a flat COCO dataset, GinJinn2 provides the :code:`ginjinn utils flatten` command.
 
-   To flatten the seeds dataset:
+   To flatten the *Leucanthemum* dataset:
 
    .. code-block:: BASH
 
@@ -423,7 +423,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
    For this purpose, GinJinn2 provides the :code:`ginjinn split` command.
    This command uses a heuristic to stratify the split on the object level.
 
-   To split the seeds dataset into train (60%), test (20%), and validation (20%):
+   To split the *Leucanthemum* dataset into train (60%), test (20%), and validation (20%):
 
    .. code-block:: BASH
 
