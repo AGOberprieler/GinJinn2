@@ -244,83 +244,83 @@ The sliding-window split should be done in the context of bounding box detection
 Model fitting
 ^^^^^^^^^^^^^
     
- 1. Generate new GinJinn2 project:
+1. Generate new GinJinn2 project:
+
+   First, we need to generate a new GinJinn2 project using the :code:`ginjinn new` command.
+   You can provide a model template (:code:`-t`) and a data directory (:code:`-d`) to this command.
+   Here, we will use a Faster R-CNN as object detection model, and the previously generated split dataset as data directory.
+   
+   .. code-block:: BASH
+
+        ginjinn new stickytraps_project -t faster_rcnn_R_101_FPN_3x.yaml -d stickytraps_split_sw
+   
+   This will create the folder :code:`stickytraps_project`, containing a :code:`ginjinn_config.yaml` file and an :code:`outputs` folder.
+
+2. Modify project configuration:
  
-    First, we need to generate a new GinJinn2 project using the :code:`ginjinn new` command.
-    You can provide a model template (:code:`-t`) and a data directory (:code:`-d`) to this command.
-    Here, we will use a Faster R-CNN as object detection model, and the previously generated split dataset as data directory.
- 
-    .. code-block:: BASH
- 
-         ginjinn new stickytraps_project -t faster_rcnn_R_101_FPN_3x.yaml -d stickytraps_split_sw
-     
-    This will create the folder :code:`stickytraps_project`, containing a :code:`ginjinn_config.yaml` file and an :code:`outputs` folder.
- 
- 2. Modify project configuration:
+   Now, we will modify the number of training iterations, the evaluation period, and the checkpointing period.
+   Additionally, we will add several optional data augmentations.
+   These are randomized data transformations (e.g. varying rotation, contrast, etc.) that are applied to the images and annotations prior to their use for model training.
+   In this way, the dataset is artificially enlarged and made more variable, which very often leads to better model performance on new data.
+
+   In :code:`ginjinn_config.yaml` we will set the entries:
+
+   .. code-block:: YAML
+
+        # ...
+        training:
+            # ...
+            max_iter: 7000
+            eval_period: 250
+            checkpoint_period: 1000
+        # ...
+        augmentation:
+           - horizontal_flip:
+               probability: 0.25
+           - vertical_flip:
+               probability: 0.25
+           - brightness:
+               brightness_min: 0.8
+               brightness_max: 1.2
+               probability: 0.25
+           - contrast:
+               contrast_min: 0.8
+               contrast_max: 1.2
+               probability: 0.25
+           - saturation:
+               saturation_min: 0.8
+               saturation_max: 1.2
+               probability: 0.25
+           - rotation_range:
+               angle_min: -30
+               angle_max: 30
+               expand: True
+               probability: 0.25
     
-    Now, we will modify the number of training iterations, the evaluation period, and the checkpointing period.
-    Additionally, we will add several optional data augmentations.
-    These are randomized data transformations (e.g. varying rotation, contrast, etc.) that are applied to the images and annotations prior to their use for model training.
-    In this way, the dataset is artificially enlarged and made more variable, which very often leads to better model performance on new data.
+   The project is now ready for training.
+
+3. Train and validate model:
+
+   Model training is started via
+
+   .. code-block:: BASH
+
+      ginjinn train stickytraps_project
+
+   While this command is running, several files will be generated in the :code:`stickytraps_project/outputs` directory.
+   The periodically updated file :code:`stickytraps_project/outputs/metrics.pdf` will contain various metrics (e.g. losses, AP) referring to the training or validation dataset and can be used to monitor the training progress.
  
-    In :code:`ginjinn_config.yaml` we will set the entries:
- 
-    .. code-block:: YAML
- 
-         # ...
-         training:
-             # ...
-             max_iter: 7000
-             eval_period: 250
-             checkpoint_period: 1000
-         # ...
-         augmentation:
-            - horizontal_flip:
-                probability: 0.25
-            - vertical_flip:
-                probability: 0.25
-            - brightness:
-                brightness_min: 0.8
-                brightness_max: 1.2
-                probability: 0.25
-            - contrast:
-                contrast_min: 0.8
-                contrast_max: 1.2
-                probability: 0.25
-            - saturation:
-                saturation_min: 0.8
-                saturation_max: 1.2
-                probability: 0.25
-            - rotation_range:
-                angle_min: -30
-                angle_max: 30
-                expand: True
-                probability: 0.25
-     
-    The project is now ready for training.
- 
- 3. Train and validate model:
- 
-    Model training is started via
- 
-    .. code-block:: BASH
- 
-         ginjinn train stickytraps_project
- 
-    While this command is running, several files will be generated in the :code:`stickytraps_project/outputs` directory.
-    The periodically updated file :code:`stickytraps_project/outputs/metrics.pdf` will contain various metrics (e.g. losses, AP) referring to the training or validation dataset and can be used to monitor the training progress.
-    
- 
- 4. Evaluate trained model:
- 
-    After training, the model can be evaluated using the test dataset by executing the :code:`ginjinn evaluate` command:
- 
-    .. code-block:: BASH
- 
-         ginjinn evaluate stickytraps_project
- 
-    This will write the evaluation output to :code:`stickytraps_project/evaluation.csv`.
-    If there is a large discrepancy between the final validation metrics (see :code:`stickytraps_project/outputs/metrics.pdf` or :code:`metrics.json`) and the evluation output, there is most likely a problem with the model.
+
+4. Evaluate trained model:
+
+   After training, the model can be evaluated using the test dataset by executing the :code:`ginjinn evaluate` command:
+
+   .. code-block:: BASH
+
+        ginjinn evaluate stickytraps_project
+
+   This will write the evaluation output to :code:`stickytraps_project/evaluation.csv`.
+   If there is a large discrepancy between the final validation metrics (see :code:`stickytraps_project/outputs/metrics.pdf` or :code:`metrics.json`) and the evluation output, there is most likely a problem with the model.
 
 Prediction and counting
 ^^^^^^^^^^^^^^^^^^^^^^^
