@@ -158,6 +158,12 @@ This will generate a COCO dataset named :code:`seeds_test_prediction`.
 This dataset can be used as an input for all other GinJinn2 commands supporting COCO input.
 The visualizations are written to :code:`seeds_test_prediction/visualization`.
 
+The visualization of the predictions will look similar to this:
+
+.. image:: images/seeds_pred_0.jpg
+    :alt: Seed image with predicted bounding boxes.
+
+
 Finally, we will use the :code:`ginjinn utils count` command to count the number of seeds per genus for each image:
 
 .. code-block:: BASH
@@ -348,6 +354,11 @@ and writes the merged images and annotations to :code:`stickytraps_test_predicti
 
 If you want to have a look at the predictions, the results can be visualized using :code:`ginjinn vis -I stickytraps_test_prediction_merged -v bbox`.
 
+The visualization of the predictions based on the sliding windows will look similar to this:
+
+.. image:: images/yellow-stickytraps_pred_0.jpg
+    :alt: Sliding-window image of the Yellow-Stickytraps dataset with predicted bounding boxes.
+
 Now that duplicate predictions are removed, we can count the insects:
 
 .. code-block:: BASH
@@ -447,71 +458,71 @@ The sliding windows will be used to train the detection model.
 Model training
 """"""""""""""
 
-    1. Generate new GinJinn2 project:
-    
-       .. code-block:: BASH
-    
-            ginjinn new leucanthemum_bbox -t faster_rcnn_R_101_FPN_3x.yaml -d leucanthemum_split_sw
-        
-    2. Modify project configuration:
+1. Generate new GinJinn2 project:
 
-       In :code:`leucanthemum_bbox/ginjinn_config.yaml` we will set the entries:
-    
-       .. code-block:: YAML
-    
-            # ...
-            training:
-                # ...
-                max_iter: 5000
-                eval_period: 250
-                checkpoint_period: 2500
-            # ...
-            augmentation:
-               - horizontal_flip:
-                   probability: 0.25
-               - vertical_flip:
-                   probability: 0.25
-               - brightness:
-                   brightness_min: 0.8
-                   brightness_max: 1.2
-                   probability: 0.25
-               - contrast:
-                   contrast_min: 0.8
-                   contrast_max: 1.2
-                   probability: 0.25
-               - saturation:
-                   saturation_min: 0.8
-                   saturation_max: 1.2
-                   probability: 0.25
-               - rotation_range:
-                   angle_min: -30
-                   angle_max: 30
-                   expand: True
-                   probability: 0.25
-        
-    3. Train and validate model
-    
-       Model training is started via:
-    
-       .. code-block:: BASH
-    
-            ginjinn train leucanthemum_bbox
-    
-       While the model is running, several files will be generated in the :code:`leucanthemum_bbox/outputs` directory.
-       The file :code:`leucanthemum_bbox/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
-    
-    4. Evaluate trained model
-    
-       .. code-block:: BASH
-    
-            ginjinn evaluate leucanthemum_bbox
-    
-       This will write the evaluation output to :code:`leucanthemum_bbox/evaluation.csv`.
-       If there is a large discrepancy between the final validation metrics (see :code:`leucanthemum_bbox/outputs/metrics.pdf` or :code:`metrics.json`) and the evaluation output, there is most likely a problem with the model.
+   .. code-block:: BASH
 
-    5. (Optional) Prediction, merging, visualization.
+      ginjinn new leucanthemum_bbox -t faster_rcnn_R_101_FPN_3x.yaml -d leucanthemum_split_sw
+  
+2. Modify project configuration:
 
-       See :code:`ginjinn predict`, :code:`ginjinn utils sw_merge`, :code:`ginjinn visualize` documentation or Yellow-Stickytraps.
+   In :code:`leucanthemum_bbox/ginjinn_config.yaml` we will set the entries:
+
+   .. code-block:: YAML
+
+      # ...
+      training:
+          # ...
+          max_iter: 5000
+          eval_period: 250
+          checkpoint_period: 2500
+      # ...
+      augmentation:
+         - horizontal_flip:
+             probability: 0.25
+         - vertical_flip:
+             probability: 0.25
+         - brightness:
+             brightness_min: 0.8
+             brightness_max: 1.2
+             probability: 0.25
+         - contrast:
+             contrast_min: 0.8
+             contrast_max: 1.2
+             probability: 0.25
+         - saturation:
+             saturation_min: 0.8
+             saturation_max: 1.2
+             probability: 0.25
+         - rotation_range:
+             angle_min: -30
+             angle_max: 30
+             expand: True
+             probability: 0.25
+  
+3. Train and validate model
+
+   Model training is started via:
+
+   .. code-block:: BASH
+
+      ginjinn train leucanthemum_bbox
+
+   While the model is running, several files will be generated in the :code:`leucanthemum_bbox/outputs` directory.
+   The file :code:`leucanthemum_bbox/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
+
+4. Evaluate trained model
+
+   .. code-block:: BASH
+
+      ginjinn evaluate leucanthemum_bbox
+
+   This will write the evaluation output to :code:`leucanthemum_bbox/evaluation.csv`.
+   If there is a large discrepancy between the final validation metrics (see :code:`leucanthemum_bbox/outputs/metrics.pdf` or :code:`metrics.json`) and the evaluation output, there is most likely a problem with the model.
+
+5. (Optional) Prediction, merging, visualization.
+
+   See :code:`ginjinn predict`, :code:`ginjinn utils sw_merge`, :code:`ginjinn visualize` documentation, or Yellow-Stickytraps.
 
 Segmentation Model
 ^^^^^^^^^^^^^^^^^^
@@ -532,86 +543,93 @@ Here, we will crop the leaf bounding boxes with a border (padding) of 25 pixels 
 Model training
 """"""""""""""
 
-    1. Generate new GinJinn2 project:
-    
-       .. code-block:: BASH
-    
-            ginjinn new leucanthemum_seg -t mask_rcnn_R_101_FPN_3x.yaml -d leucanthemum_split_cropped
-        
-    2. Modify project configuration:
+1. Generate new GinJinn2 project:
 
-       In :code:`leucanthemum_seg/ginjinn_config.yaml` we will set the entries:
-    
-       .. code-block:: YAML
-    
-            # ...
-            training:
-                # ...
-                max_iter: 5000
-                eval_period: 250
-                checkpoint_period: 2500
-            # ...
-            augmentation:
-               - horizontal_flip:
-                   probability: 0.25
-               - vertical_flip:
-                   probability: 0.25
-               - brightness:
-                   brightness_min: 0.8
-                   brightness_max: 1.2
-                   probability: 0.25
-               - contrast:
-                   contrast_min: 0.8
-                   contrast_max: 1.2
-                   probability: 0.25
-               - saturation:
-                   saturation_min: 0.8
-                   saturation_max: 1.2
-                   probability: 0.25
-               - rotation_range:
-                   angle_min: -30
-                   angle_max: 30
-                   expand: True
-                   probability: 0.25
+   .. code-block:: BASH
 
-    3. Train and validate model
-    
-       Model training is started via:
-    
-       .. code-block:: BASH
-    
-            ginjinn train leucanthemum_seg
-    
-       While the model is running, several files will be generated in the :code:`leucanthemum_seg/outputs` directory.
-       The file :code:`leucanthemum_seg/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
-    
-    4. Evaluate trained model
-    
-       .. code-block:: BASH
-    
-            ginjinn evaluate leucanthemum_seg
-    
-       This will write the evaluation output to :code:`leucanthemum_seg/evaluation.csv`.
-       If there is a large discrepancy between the final validation metrics (see :code:`leucanthemum_seg/outputs/metrics.pdf` or :code:`metrics.json`) and the evaluation output, there is most likely a problem with the model.
+        ginjinn new leucanthemum_seg -t mask_rcnn_R_101_FPN_3x.yaml -d leucanthemum_split_cropped
+  
+2. Modify project configuration:
 
-    5. (Optional) Predict and visualize
+   In :code:`leucanthemum_seg/ginjinn_config.yaml` we will set the entries:
 
-       We might be interested in how the model predictions look like:
+   .. code-block:: YAML
 
-       .. code-block:: BASH
-    
-            ginjinn predict leucanthemum_seg -i leucanthemum_split_cropped/test/images -o leucanthemum_seg_test_prediction -v -c
+      # ...
+      training:
+          # ...
+          max_iter: 5000
+          eval_period: 250
+          checkpoint_period: 2500
+      # ...
+      augmentation:
+         - horizontal_flip:
+             probability: 0.25
+         - vertical_flip:
+             probability: 0.25
+         - brightness:
+             brightness_min: 0.8
+             brightness_max: 1.2
+             probability: 0.25
+         - contrast:
+             contrast_min: 0.8
+             contrast_max: 1.2
+             probability: 0.25
+         - saturation:
+             saturation_min: 0.8
+             saturation_max: 1.2
+             probability: 0.25
+         - rotation_range:
+             angle_min: -30
+             angle_max: 30
+             expand: True
+             probability: 0.25
 
-       The predictions will probably not look very convincing right now.
-       To improve the segmentations, we can make use of the segmentation refinement option (:code:`-r`) of the :code:`ginjinn predict` command.
-       This will use CascadePSP for improving the segmentations.
-       This refinement is only possible, when object borders are relatively pronounced.
+3. Train and validate model
 
-       .. code-block:: BASH
-    
-            ginjinn predict leucanthemum_seg -i leucanthemum_split_cropped/test/images -o leucanthemum_seg_test_prediction_refined -v -c -r
+   Model training is started via:
 
-       The new predictions should look much better.
+   .. code-block:: BASH
+
+      ginjinn train leucanthemum_seg
+
+   While the model is running, several files will be generated in the :code:`leucanthemum_seg/outputs` directory.
+   The file :code:`leucanthemum_seg/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
+
+4. Evaluate trained model
+
+   .. code-block:: BASH
+
+      ginjinn evaluate leucanthemum_seg
+
+   This will write the evaluation output to :code:`leucanthemum_seg/evaluation.csv`.
+   If there is a large discrepancy between the final validation metrics (see :code:`leucanthemum_seg/outputs/metrics.pdf` or :code:`metrics.json`) and the evaluation output, there is most likely a problem with the model.
+
+5. (Optional) Predict and visualize
+
+   We might be interested in how the model predictions look like:
+
+   .. code-block:: BASH
+
+      ginjinn predict leucanthemum_seg -i leucanthemum_split_cropped/test/images -o leucanthemum_seg_test_prediction -v -c
+
+   The predictions will probably not look very convincing right now.
+   To improve the segmentations, we can make use of the segmentation refinement option (:code:`-r`) of the :code:`ginjinn predict` command.
+   This will use CascadePSP for improving the segmentations.
+   This refinement is only possible, when object borders are relatively pronounced.
+
+   .. code-block:: BASH
+
+      ginjinn predict leucanthemum_seg -i leucanthemum_split_cropped/test/images -o leucanthemum_seg_test_prediction_refined -v -c -r
+
+   The new predictions should look much better.
+   
+   Visualizations of the predictions might look like this:
+
+   .. image:: images/leucanthemum_seg_pred_0.png
+        :alt: Visualization of the Leucanthemum segmentation prediction without and with refinement.
+        :width: 400
+        :align: center
 
 Making predictions
 ^^^^^^^^^^^^^^^^^^
@@ -619,9 +637,9 @@ Making predictions
 With both models trained, we can now run the leaf extraction pipeline.
 To predict on new data, the following steps are required:
 
-    1) Split new images into sliding windows
-    2) Predict from BBox Model to get leaf bounding boxes
-    3) Predict from Seg. Model on bounding boxes
+1) Split new images into sliding windows
+2) Predict from BBox Model to get leaf bounding boxes
+3) Predict from Seg. Model on bounding boxes
 
 .. image:: images/leucanthemum_prediction.png
     :alt: Leucanthemum prediction workflow.
@@ -653,3 +671,10 @@ Finally, we can use the cropped bounding boxes as input for the Seg. Model.
     ginjinn predict leucanthemum_seg -i new_data_sw_pred/images_cropped/ -o new_data_seg_pred -v -c -r
 
 The predicted leaf masks (:code:`new_data_seg_pred/masks_cropped`) can now be used to, for example, quantify the leaf shape using geometrics morphometrics.
+
+The masks should look like this:
+
+.. image:: images/leucanthemum_workflow_masks_0.png
+    :alt: Visualization of the Leucanthemum workflow prediction.
+    :width: 600
+    :align: center
