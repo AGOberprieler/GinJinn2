@@ -229,6 +229,8 @@ In both cases, slashes in the original image paths are replaced by some reserved
         └── Logfia~gallica~2.jpg
 
 
+.. _4-toolbox_sw_cropping:
+
 Sliding-Window Cropping
 -----------------------
 

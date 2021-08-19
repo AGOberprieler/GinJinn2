@@ -3,17 +3,18 @@
 Example Applications
 ====================
 
-In the following, we will explore the application of GinJinn2 for the automatic detection of structures in several different epirical contexts.
+In the following, we will explore how GinJinn2 can be applied to automatically detect structures in several empirical contexts.
 
-The Seeds Dataset
------------------
+Seed Counting
+-------------
 
 The seeds dataset comprises microscopic images of sand-contaminated seed mixtures of the plant genera *Sedum* and *Arabidopsis*.
-The seeds are annotated with bounding-boxes, determining the genus membership.
-Such a dataset might be analyzed for quality control purposes, i.e. if the composition of a seed mixture is as expected.
-In the following, we will train a model to automatically detect seeds, determine the genus, finally determine the seed mixture composition using GinJinn2.
+The seeds are annotated with bounding-boxes and labeled according to their genus membership.
+Such a dataset might be analyzed for quality control purposes, i.e., to assess if the composition of a commercial seed mixture is as expected.
+Another possible scenario is the analysis of ecological samples such as seeds collected with seed traps.
+In the following, we will train a model to automatically detect seeds and determine their genus, and finally quantify the composition of seed mixtures.
 
-An example image with overlayed annotation:
+An example image overlaid with object annotations:
 
 .. image:: images/seeds_ann_0.jpg
     :alt: Seed image with bounding-box annotations.
@@ -36,10 +37,10 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
 2. Flatten the COCO dataset:
    
-   GinJinn2 expects all images to be placed directly in the folder :code:`images` within the dataset folder an as a sibling of the annotations (:code:`annotations.json` for COCO or :code:`annotaitons` folder for Pascal-VOC).
+   GinJinn2 expects all images to be placed directly in the folder :code:`images` within the dataset folder, being sibling of the annotations (:code:`annotations.json` for COCO or :code:`annotations` folder for Pascal-VOC).
    To transform any valid COCO dataset into a flat COCO dataset, GinJinn2 provides the :code:`ginjinn utils flatten` command.
 
-   To flatten the seeds dataset:
+   Flatten the seeds dataset:
 
    .. code-block:: BASH
 
@@ -47,19 +48,19 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
 3. Train-Validation-Test split:
 
-   It is a good practice in Machine Learning (ML) to split the dataset into sub-datasets for training, validation, and testing.
-   This is necessary to be able to assess the performance of a trained ML on unseen data.
-   The general idea is to use the training dataset for model training, and the validation (sometimes called "development") dataset for hyper-parameter tuning, and finally the test dataset as a proxy for real-world performance of the model.
+   It is a good practice in Machine Learning (ML) to split the available labeled data into sub-datasets for training, validation, and testing.
+   This enables to assess the performance of a trained ML model on unseen data.
+   The general idea is to use the training dataset for model training, the validation (sometimes called "development") dataset for hyper-parameter tuning, and, finally, the test dataset as a proxy for the real-world performance of the model.
    For this purpose, GinJinn2 provides the :code:`ginjinn split` command.
-   This command uses a heuristic to stratify the split on the object level.
+   This command uses a heuristic to generate sub-datasets whose object occurrences aim to be representative for the original dataset.
 
-   To split the seeds dataset into train (60%), test (20%), and validation (20%):
+   Split the dataset into sub-datasets for training (60%), test (20%), and validation (20%):
 
    .. code-block:: BASH
 
         ginjinn split -I seeds_flat -o seeds_split -d bbox-detection -t 0.2 -v 0.2
 
-Now the dataset is ready to be used for modeling with GinJinn2.
+Now the dataset is ready to be used for model training.
 
 
 Model fitting
@@ -67,7 +68,7 @@ Model fitting
 
 1. Generate new GinJinn2 project:
 
-   First, we need to generate new GinJinn2 project using the :code:`ginjinn new` command.
+   First, we need to generate a new GinJinn2 project using the :code:`ginjinn new` command.
    You can provide a model template (:code:`-t`), and a data directory (:code:`-d`) to this command.
    Here, we will use a Faster R-CNN as detection model, and the previously generated split dataset as data directory.
 
@@ -75,14 +76,14 @@ Model fitting
 
         ginjinn new seeds_project -t faster_rcnn_R_101_FPN_3x.yaml -d seeds_split
     
-   This will create the folder :code:`seeds_project`, containing a :code:`ginjinn_config.yaml` configuration file and an :code:`outputs` folder for modeling outputs.
+   This will create the folder :code:`seeds_project`, containing a :code:`ginjinn_config.yaml` file and an :code:`outputs` folder.
 
 2. Modify project configuration:
    
    Now, we will modify the number of training iterations, the evaluation period, and the checkpointing period.
-   Additionally, we will add several data augmentation options.
-   Augmentations are somewhat random data transformations (e.g. rotation, contrast adaption, ...) that are applied to the images and annotations prior to training.
-   By applying these transformations, the dataset is artifically enlarged and made more variable, which very often leads to better model performance on new data.
+   Additionally, we will add several optional data augmentations.
+   These are randomized data transformations (e.g. varying rotation, contrast, etc.) that are applied to the images and annotations prior to their use for model training.
+   In this way, the dataset is artificially enlarged and made more variable, which very often leads to better model performance on new data.
 
    In :code:`ginjinn_config.yaml` we will set the entries:
 
@@ -120,42 +121,41 @@ Model fitting
     
    The project is now ready for training.
 
-3. Train and validate model
+3. Train and validate model:
 
-   Model training is started via:
+   Model training is started via
 
    .. code-block:: BASH
 
         ginjinn train seeds_project
 
-   While the model is running, several files will be generated in the :code:`seeds_project/outputs` directory.
-   The file :code:`seeds_project/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
+   While this command is running, several files will be generated in the :code:`seeds_project/outputs` directory.
+   The periodically updated file :code:`seeds_project/outputs/metrics.pdf` will contain various metrics (e.g. losses, AP) referring to the training or validation dataset and can be used to monitor the training progress.
 
-4. Evaluate trained model
+4. Evaluate trained model:
 
-   After training, the model can be evaluated using the test dataset by calling the :code:`ginjinn evaluate` command:
+   After training, the model can be evaluated using the test dataset by executing the command
 
    .. code-block:: BASH
 
         ginjinn evaluate seeds_project
 
    This will write the evaluation output to :code:`seeds_project/evaluation.csv`.
-   If there is a large discrepancy between the final validation metrics (see :code:`seeds_project/outputs/metrics.pdf` or :code:`metrics.json`) and the evluation output, there is most likely a problem with the model.
+   If there is a large discrepancy between the final validation metrics (see :code:`seeds_project/outputs/metrics.pdf` or :code:`metrics.json`) and the evaluation output, there is most likely a problem with the model.
 
 Prediction and counting
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Now, we can use the trained model to predict bounding-boxes and genus on new data.
-As stand-in for new data, we will use the previously generated test dataset.
-The :code:`ginjinn predict` command is used for this purpose.
-We will also turn on the visualization option (:code:`-v`) , the get a visual representation of the prediction.
+Now, we can use the trained model to predict bounding-boxes enclosing seeds and their respective genus for new image data.
+As stand-in for new data, we will use the previously generated test dataset as input to the :code:`ginjinn predict` command.
+We will also turn on the visualization option (:code:`-v`) to get a visual representation of the predictions.
 
 .. code-block:: BASH
 
     ginjinn predict seeds_project -i seeds_split/test/images -o seeds_test_prediction -v
 
-This will generate a COCO dataset at :code:`seeds_test_prediction`.
-This dataset can be used as an input for all other GinJinn2 commands expecting COCO input.
+This will generate a COCO dataset named :code:`seeds_test_prediction`.
+This dataset can be used as an input for all other GinJinn2 commands supporting COCO input.
 The visualizations are written to :code:`seeds_test_prediction/visualization`.
 
 Finally, we will use the :code:`ginjinn utils count` command to count the number of seeds per genus for each image:
@@ -164,32 +164,31 @@ Finally, we will use the :code:`ginjinn utils count` command to count the number
 
     ginjinn utils count -a seeds_test_prediction/annotations.json -o seeds_test_prediction/counts.csv
 
-This will write the image-wise seed counts per species to the CSV file :code:`seeds_test_prediction/counts.csv`.
-Based on this file, the proportion of seeds can be calculated using any tool with CSV-reading capability (e.g. EXCEL, R, Python, ...).
+This will write the image-wise seed counts to :code:`seeds_test_prediction/counts.csv`.
+Based on this file, the proportion of seeds from both genera can be calculated using any tool with CSV-reading capability (e.g. EXCEL, R, Python, ...).
 
 
-The Yellow-Stickytraps Dataset
-------------------------------
+Insect Monitoring using Glue Traps
+----------------------------------
 
-The Yellow-Stickytraps dataset comprises images of yellow glue traps that were set in greenhouses.
+The Yellow-Stickytraps dataset comprises images of yellow glue traps placed in greenhouses.
 Three categories of insects are annotated with bounding boxes: Whiteflies (WF), *Nesidiocoris* (NC), and *Macrolophus* (MC).
-The task will be to automate the counting of insects per category.
-Such an automation can be useful for evaluating the effectiveness of pest control measures.
+Our goal is to automate the counting of insects per category.
+This may, for example, be useful for evaluating the effectiveness of pest control measures.
 
 The Yellow-Stickytraps dataset has some potentially problematic properties:
 
-1) the objects (insects) are very small compared to the image size
-2) the bounding box annotations are relatively loose
-3) the contrast of the background to the insects is relatively low
+1) Objects (insects) are very small compared to the image size.
+2) Bounding box annotations are relatively loose.
+3) The contrast between background and insects is relatively low.
 
-We will use GinJinn to solve problem 1) by splitting the original images into sliding windows, which will be used as input
-for a bounding-box model.
-Problems 2) and 3) can be solved by a more careful annotation sheme and image preprocessing, respectively.
+We will mitigate problem 1) by splitting the original images into sliding windows, which will be used as input for a bounding-box object detection model.
+Problems 2) and 3) could be addressed by a more careful annotation scheme and image preprocessing, respectively.
 Those, however, will not be discussed in this section.
 
 In the following, we will train a model to automatically detect, categorize, and count insects.
 
-An example image with overlayed annotation:
+An example image overlaid with object annotations:
 
 .. image:: images/yellow-stickytraps_ann_0.jpg
     :alt: Yellow-Stickytraps image with bounding-box annotations.
@@ -213,7 +212,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
 2. Flatten the COCO dataset:
 
-    Make sure all images are in the same root directory:
+   This makes sure all images are located in the same directory:
 
    .. code-block:: BASH
 
@@ -221,23 +220,22 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
 3. Train-Validation-Test split:
 
-   We split the seeds dataset into train (60%), test (20%), and validation (20%).
-   For this dataset, it might be necessary to try different split proposals until the category proportions are right.
+   We split the Yellow-Stickytraps dataset into sub-datasets for training (60%), test (20%), and validation (20%).
+   For this dataset, it may be necessary to generate multiple split proposals until the category proportions are sufficiently homogeneous across the sub-datasets.
 
    .. code-block:: BASH
 
         ginjinn split -I stickytraps_flat -o stickytraps_split -d bbox-detection -t 0.2 -v 0.2
 
 
-Slinding window splitting
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Sliding-window cropping
+^^^^^^^^^^^^^^^^^^^^^^^
 
-We will now apply sliding window splitting to be able to detect the small insects in the relatively large glue traps.
-For an introduction to sliding window splitting are described in `not yet available <#>`_.
+We will now apply :ref:`Sliding-Window Cropping <4-toolbox_sw_cropping>` to be able to detect the small insects fixed on relatively large glue traps. 
 The following command will split the original images into sliding windows of 1024x1024 pixels in size (:code:`-s 1024`)
 with an overlap of 256 pixels (:code:`-p 256`) between neighboring sliding windows.
 Annotations that are incomplete after the splitting, i.e. "cut-off" polygons, will be excluded (:code:`-c`).
-The sliding window split should be done in context of bounding box model (:code:`-k bbox-detection`).
+The sliding-window split should be done in the context of bounding box detection (:code:`-k bbox-detection`).
 
 .. code-block:: BASH
 
@@ -248,22 +246,22 @@ Model fitting
     
  1. Generate new GinJinn2 project:
  
-    First, we need to generate new GinJinn2 project using the :code:`ginjinn new` command.
-    You can provide a model template (:code:`-t`), and a data directory (:code:`-d`) to this command.
-    Here, we will use a Faster R-CNN as detection model, and the previously generated split dataset as data directory.
+    First, we need to generate a new GinJinn2 project using the :code:`ginjinn new` command.
+    You can provide a model template (:code:`-t`) and a data directory (:code:`-d`) to this command.
+    Here, we will use a Faster R-CNN as object detection model, and the previously generated split dataset as data directory.
  
     .. code-block:: BASH
  
          ginjinn new stickytraps_project -t faster_rcnn_R_101_FPN_3x.yaml -d stickytraps_split_sw
      
-    This will create the folder :code:`stickytraps_project`, containing a :code:`ginjinn_config.yaml` configuration file and an :code:`outputs` folder for modeling outputs.
+    This will create the folder :code:`stickytraps_project`, containing a :code:`ginjinn_config.yaml` file and an :code:`outputs` folder.
  
  2. Modify project configuration:
     
     Now, we will modify the number of training iterations, the evaluation period, and the checkpointing period.
-    Additionally, we will add several data augmentation options.
-    Augmentations are somewhat random data transformations (e.g. rotation, contrast adaption, ...) that are applied to the images and annotations prior to training.
-    By applying these transformations, the dataset is artifically enlarged and made more variable, which very often leads to better model performance on new data.
+    Additionally, we will add several optional data augmentations.
+    These are randomized data transformations (e.g. varying rotation, contrast, etc.) that are applied to the images and annotations prior to their use for model training.
+    In this way, the dataset is artificially enlarged and made more variable, which very often leads to better model performance on new data.
  
     In :code:`ginjinn_config.yaml` we will set the entries:
  
@@ -301,20 +299,21 @@ Model fitting
      
     The project is now ready for training.
  
- 3. Train and validate model
+ 3. Train and validate model:
  
-    Model training is started via:
+    Model training is started via
  
     .. code-block:: BASH
  
          ginjinn train stickytraps_project
  
-    While the model is running, several files will be generated in the :code:`stickytraps_project/outputs` directory.
-    The file :code:`stickytraps_project/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
+    While this command is running, several files will be generated in the :code:`stickytraps_project/outputs` directory.
+    The periodically updated file :code:`stickytraps_project/outputs/metrics.pdf` will contain various metrics (e.g. losses, AP) referring to the training or validation dataset and can be used to monitor the training progress.
+    
  
- 4. Evaluate trained model
+ 4. Evaluate trained model:
  
-    After training, the model can be evaluated using the test dataset by calling the :code:`ginjinn evaluate` command:
+    After training, the model can be evaluated using the test dataset by executing the :code:`ginjinn evaluate` command:
  
     .. code-block:: BASH
  
@@ -326,30 +325,28 @@ Model fitting
 Prediction and counting
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Now, we can use the trained model to predict bounding-boxes and insect categories on new data.
-As stand-in for new data, we will use the previously generated test dataset.
-The :code:`ginjinn predict` command is used for this purpose.
-We will also turn on the visualization option (:code:`-v`) , the get a visual representation of the prediction.
+Now, we can use the trained model to predict bounding boxes and insect categories on new image data.
+As stand-in for new data, we will use the previously generated test dataset as input to the :code:`ginjinn predict` command.
+We will also turn on the visualization option (:code:`-v`), to get a visual representation of the predictions.
 
 .. code-block:: BASH
 
     ginjinn predict stickytraps_project -i stickytraps_split_sw/test/images -o stickytraps_test_prediction -v
 
-This will generate a COCO dataset (sans original images) at :code:`stickytraps_test_prediction`.
-This dataset can be used as an input for all other GinJinn2 commands expecting COCO input.
+This will generate a COCO dataset named :code:`stickytraps_test_prediction`, which can be used as an input for all other GinJinn2 commands supporting COCO input.
 The visualizations are written to :code:`stickytraps_test_prediction/visualization`.
 
-Before we can count the insects, we first to remove duplicate detections.
-A duplicate detection occurs, when an object is present in two or more sliding windows, and is successfully detected in more than one of them.
-We will use :code:`ginjinn utils sw_merge` to combine the sliding window predictions, and reconstruct the orignal input image; this will automatically remove duplicate predictions.
-The following command merges the sliding window images (:code:`-i stickytraps_split/test/images`) and annotations (:code:`-a stickytraps_test_prediction/annotations.json`),
-and saves the merged images and annotations to :code:`stickytraps_test_prediction_merged` (:code:`-o`).
+Before we can count the insects, we first need to remove duplicated objects.
+Duplications occur when an object is present in two or more sliding windows and successfully detected in more than one of them.
+We will use :code:`ginjinn utils sw_merge` to combine the predictions for sliding windows as this will automatically remove duplicate predictions.
+The following command merges the sliding-window images (:code:`-i stickytraps_split/test/images`) and annotations (:code:`-a stickytraps_test_prediction/annotations.json`),
+and writes the merged images and annotations to :code:`stickytraps_test_prediction_merged` (:code:`-o`).
 
 .. code-block:: BASH
 
     ginjinn utils sw_merge -i stickytraps_split_sw/test/images -a stickytraps_test_prediction/annotations.json -o stickytraps_test_prediction_merged -t bbox-detection
 
-If you want to have a look at the prediction, the results can be visualized using :code:`ginjinn vis -I stickytraps_test_prediction_merged -v bbox`.
+If you want to have a look at the predictions, the results can be visualized using :code:`ginjinn vis -I stickytraps_test_prediction_merged -v bbox`.
 
 Now that duplicate predictions are removed, we can count the insects:
 
@@ -357,12 +354,11 @@ Now that duplicate predictions are removed, we can count the insects:
 
     ginjinn utils count -a stickytraps_test_prediction_merged/annotations.json -o stickytraps_test_prediction_merged/counts.csv
 
-This will write the image-wise insects counts to the CSV file :code:`stickytraps_test_prediction_merged/counts.csv`.
-The file can be processed using any tool with CSV-reading capability (e.g. EXCEL, R, Python, ...).
+This will write the image-wise insects counts to :code:`stickytraps_test_prediction_merged/counts.csv`, which can be processed using any tool with CSV-reading capability (e.g. EXCEL, R, Python, ...).
 
 
-The *Leucanthemum* Dataset
---------------------------
+*Leucanthemum* Leaf Segmentation
+--------------------------------
 
 The *Leucanthemum* dataset comprises digital images of herbarium specimens from 12 *Leucanthemum* species.
 There is only one object category "leaf", which denotes intact leaves that might be used to quantify leaf shape for, e.g., geometric morphometrics.

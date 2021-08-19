@@ -246,6 +246,6 @@ Conclusion
 ----------
 
 We have applied GinJinn2 for instance segmentation using simulated data.
-If you want to see how GinJinn2 can be used for object detection and instance segmentation with empirical data, have a look at the :doc:`Empirical Applications <5-empirical_applications>` document.
+If you want to see how GinJinn2 can be used for object detection and instance segmentation with empirical data, have a look at the :doc:`Empirical Applications <5-example_applications>` document.
 
 For information on GinJinn2 project configurations see :doc:`Project Configuration <6-project_configuration>`.
