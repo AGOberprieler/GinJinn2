@@ -8,11 +8,7 @@ Besides providing a convenient interface to the latter, GinJinn2 offers several 
 
 ## Documentation
 
-<<<<<<< HEAD
 See our Read the Docs [Documentation](https://ginjinn2.readthedocs.io/en/latest/).
-=======
-See out Read the Docs [Documentation](https://ginjinn2.readthedocs.io/en/latest/).
->>>>>>> docs
 
 ## Installation
 ### Requirements
