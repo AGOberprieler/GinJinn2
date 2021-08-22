@@ -16,6 +16,8 @@ Help
 
 The help pages briefly describe basic functionality and command-specific arguments.
 
+.. _2-overview_ds_formats:
+
 Dataset formats
 ---------------
 
@@ -24,7 +26,7 @@ GinJinn2 supports two common annotation formats, `COCO's data format <https://co
 The latter, however, is only supported for bounding-box object detection.
 
 + COCO
-    .. code-block::
+    .. code-block:: none
 
         data
         ├── annotations.json
@@ -34,7 +36,7 @@ The latter, however, is only supported for bounding-box object detection.
             └── ...
 
 + Pascal Voc
-    .. code-block::
+    .. code-block:: none
 
         data
         ├── annotations
@@ -50,6 +52,8 @@ In case of nested image directories, ``ginjinn utils flatten`` helps to convert 
 
 Basic workflow
 --------------
+
+A basic object detection workflow consists of the following steps:
 
 1.  ``ginjinn new``
 
