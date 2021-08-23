@@ -1,4 +1,4 @@
-.. _5-project_configuration:
+.. _6-project_configuration:
 
 Project Configuration
 =====================

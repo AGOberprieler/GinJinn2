@@ -1,4 +1,4 @@
-.. _4-example_applications:
+.. _5-example_applications:
 
 Example Applications
 ====================
@@ -371,29 +371,29 @@ This will write the image-wise insects counts to :code:`stickytraps_test_predict
 *Leucanthemum* Leaf Segmentation
 --------------------------------
 
-The *Leucanthemum* dataset comprises digital images of herbarium specimens from 12 *Leucanthemum* species.
-There is only one object category "leaf", which denotes intact leaves that might be used to quantify leaf shape for, e.g., geometric morphometrics.
-To be able to train a segmentation model for pixel perfect detection, the leaves are annotated using polygons.
+The *Leucanthemum* dataset comprises images of herbarium specimens from 12 *Leucanthemum* species.
+There is only one object category "leaf", which denotes intact leaves that could be used to quantify leaf shape, e.g., for geometric morphometrics.
+To be able to train a segmentation model for pixel-perfect detection, the leaves are annotated using polygons.
 
-An example image with overlayed annotation (original images are color images, the image is shown in grayscale to emphasize the annotations):
+An example image with overlaid object annotations (here, the image is shown in grayscale to emphasize the annotations):
 
 .. image:: images/leucanthemum_ann_0.jpg
     :alt: Leucanthemum image with instance-segmentation annotations.
 
-For this dataset, we will build a pipeline to facilitate automatic feature extraction from digitized herbarium specimens.
-Similar to the Yellow-Stickytrap dataset, there are some potential problems concerning the data:
+Using this dataset, we will build a pipeline to facilitate automatic feature extraction from digitized herbarium specimens.
+Similar to the Yellow-Stickytraps dataset, there are some potential problems concerning the data:
 
-1) the objects (leaves) are small in relation to the image size
-2) the images are very large (~4000x6000 pixels)
-3) the objects (leaves) are very variable (basal vs. apical leaves) 
+1) The objects (leaves) are small in relation to the image size.
+2) The images are very large (~4000x6000 pixels).
+3) The objects (leaves) are very variable (basal vs. apical leaves).
 
-Problem 3) could potentially be solved by subdiving the leaf category into subcategories for, e.g., apical, intermediate, and basal leaves.
-This, however, would potentially required a larger amount of training data to account for the now smaller number of samples per category.
+Problem 3) could potentially be solved by subdiving the leaf category into subcategories like apical, intermediate, and basal leaves.
+This, however, would potentially require a larger amount of training data to account for the now smaller number of samples per category.
 We will concentrate on solving problems 1) and 2) by applying a custom pipeline consisting of two models:
 The first model, from now on called BBox Model, will be trained to detect the bounding boxes of intact leaves in sliding-window crops of the original images.
 The second model, from now on called Segmentation Model (Seg. Model), will segment the leaves within the bounding boxes.
 
-The pipeline will look like this:
+The pipeline for model fitting will look like this:
 
 .. image:: images/leucanthemum_workflow.png
     :alt: Leucanthemum leaf segmentation pipeline.
@@ -432,9 +432,9 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
    This is necessary to be able to assess the performance of a trained ML on unseen data.
    The general idea is to use the training dataset for model training, and the validation (sometimes called "development") dataset for hyper-parameter tuning, and finally the test dataset as a proxy for real-world performance of the model.
    For this purpose, GinJinn2 provides the :code:`ginjinn split` command.
-   This command uses a heuristic to stratify the split on the object level.
+   This command uses a heuristic to generate sub-datasets whose object occurrences aim to be representative for the original dataset.
 
-   To split the *Leucanthemum* dataset into train (60%), test (20%), and validation (20%):
+   Split the *Leucanthemum* dataset into train (60%), test (20%), and validation (20%):
 
    .. code-block:: BASH
 
@@ -443,7 +443,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 Bounding Box Model
 ^^^^^^^^^^^^^^^^^^
 
-Sliding window splitting
+Sliding-window splitting
 """"""""""""""""""""""""
 
 Similar to the Yellow-Stickytraps analysis, we will split the dataset into sliding windows.
@@ -454,6 +454,7 @@ This time, however, we will use larger windows (:code:`-s 2048`) with a larger o
     ginjinn utils sw_split -I leucanthemum_split -o leucanthemum_split_sw -s 2048 -p 512 -c
 
 The sliding windows will be used to train the detection model.
+Since the latter should only learn to detect complete, intact leaves, we use the ``-c/--remove_incomplete`` option to discard annotations of trimmed leaves.
 
 Model training
 """"""""""""""
@@ -508,8 +509,8 @@ Model training
 
       ginjinn train leucanthemum_bbox
 
-   While the model is running, several files will be generated in the :code:`leucanthemum_bbox/outputs` directory.
-   The file :code:`leucanthemum_bbox/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
+   During the training process, several files will be generated in the :code:`leucanthemum_bbox/outputs` directory.
+   The periodically updated file :code:`leucanthemum_bbox/outputs/metrics.pdf` will contain various metrics (e.g. losses, AP) referring to the training or validation dataset and can be used to monitor the training progress.
 
 4. Evaluate trained model
 
@@ -530,11 +531,11 @@ Segmentation Model
 Bounding box cropping
 """""""""""""""""""""
 
-To train a model to extract leaves pixel perfectly from leaf bounding boxes, we will need to process the *Leucanthemum* dataset.
+To train a model to segment leaves within their already known bounding boxes, we first need to process the *Leucanthemum* dataset.
 Ginjinn provides the :code:`ginjinn utils crop` command, which crops bounding boxes or polygons from annotated images, and generates a new annotation referring to
 the cropped images.
 The cropped images can then be used for model training.
-Here, we will crop the leaf bounding boxes with a border (padding) of 25 pixels (:code:`-p 25`) to account for some variation in the bounding boxes.
+Here, we will crop the leaf bounding boxes with an additional margin (padding) of 25 pixels (:code:`-p 25`) to account for some variation surrounding the leaves.
 
 .. code-block:: BASH
     
@@ -593,8 +594,8 @@ Model training
 
       ginjinn train leucanthemum_seg
 
-   While the model is running, several files will be generated in the :code:`leucanthemum_seg/outputs` directory.
-   The file :code:`leucanthemum_seg/outputs/metrics.pdf` will contain training and validation dataset metrics, like losses and mAPs, and can be used to monitor the training progress.
+   While this command is running, several files will be generated in the :code:`leucanthemum_seg/outputs` directory.
+   The periodically updated file :code:`leucanthemum_seg/outputs/metrics.pdf` will contain various metrics (e.g. losses, AP) referring to the training or validation dataset and can be used to monitor the training progress.
 
 4. Evaluate trained model
 
@@ -616,7 +617,7 @@ Model training
    The predictions will probably not look very convincing right now.
    To improve the segmentations, we can make use of the segmentation refinement option (:code:`-r`) of the :code:`ginjinn predict` command.
    This will use CascadePSP for improving the segmentations.
-   This refinement is only possible, when object borders are relatively pronounced.
+   This refinement is typically beneficial when object borders are relatively pronounced.
 
    .. code-block:: BASH
 
@@ -658,19 +659,31 @@ Size (:code:`-s 2048`) and overlap (:code:`-p 512`) should be same as for the tr
     ginjinn utils sw_split -i new_images -o new_data_sw -s 2048 -p 512
 
 Now, we predict the bounding boxes of the leaves using the BBox Model.
-We will also add some padding (:code:`-p 25`), since we did the same when cropping the training images for Seg. Model.
 
 .. code-block:: BASH
     
-    ginjinn predict leucanthemum_bbox -i new_data_sw -o new_data_sw_pred -v -c -p 25
+    ginjinn predict leucanthemum_bbox -i new_data_sw -o new_data_sw_pred -v
+
+To remove (merge) duplicated predictions within the overlap of neighboring windows, we can use ``sw_merge``, which kind of reverts the sliding-window split.
+
+.. code-block:: BASH
+
+    ginjinn utils sw_merge -a new_data_sw_pred/annotations.json -i new_data_sw -o new_data_sw_pred_merged -t bbox-detection
+
+These (merged) leaf bounding boxes are now cropped from the (reconstructed) original images.
+We also add some padding (:code:`-p 25`), since we did the same when cropping the training images for the Seg. Model.
+
+.. code-block:: BASH
+
+    ginjinn utils crop -I new_data_sw_pred_merged -o new_data_sw_pred_merged/images_cropped -t bbox -p 25
 
 Finally, we can use the cropped bounding boxes as input for the Seg. Model.
 
 .. code-block:: BASH
     
-    ginjinn predict leucanthemum_seg -i new_data_sw_pred/images_cropped/ -o new_data_seg_pred -v -c -r
+    ginjinn predict leucanthemum_seg -i new_data_sw_pred_merged/images_cropped -o new_data_seg_pred -v -c -r
 
-The predicted leaf masks (:code:`new_data_seg_pred/masks_cropped`) can now be used to, for example, quantify the leaf shape using geometrics morphometrics.
+The predicted leaf masks (:code:`new_data_seg_pred/masks_cropped`) can, for example, be used to quantify the leaf shape using geometric morphometrics.
 
 The masks should look like this:
 
