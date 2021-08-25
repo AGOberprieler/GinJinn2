@@ -146,4 +146,4 @@ GinJinn2 is released under the [Apache 2.0 license](LICENSE).
 
 ## Citation
 
-XYZ
+Ott T. and Lautenschlager U. (2021). GinJinn2: Object detection and segmentation for ecology and evolution. *bioRxiv*, 2021.08.20.457033. https://doi.org/10.1101/2021.08.20.457033
