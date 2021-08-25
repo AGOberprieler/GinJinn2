@@ -80,4 +80,4 @@ A basic object detection workflow consists of the following steps:
     It provides several optional types of output: a COCO annotation file, object visualization on the original images, and cropped images (segmentation masks) for each predicted object.
 
 
-Concrete workflows including more complex examples are described in XYZ.
+Concrete workflows including more complex examples are described in :doc:`Getting Started <3-getting_started>` and :doc:`Toolbox <4-toolbox>`.
