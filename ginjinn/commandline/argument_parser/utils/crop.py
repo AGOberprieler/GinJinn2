@@ -70,11 +70,7 @@ def setup_crop_parser(subparsers):
         '-I', '--dataset_dir',
         type = str,
         help = '''
-<<<<<<< HEAD
-            COCO dataset directory.
-=======
             Simple or split COCO dataset directory.
->>>>>>> cli-refactoring
         ''',
         required=False,
     )
