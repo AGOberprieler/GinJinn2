@@ -13,7 +13,8 @@ from .train import setup_train_parser
 from .utils import setup_utils_parser
 from .visualize import setup_visualize_parser
 
-class GinjinnArgumentParser():
+
+class GinjinnArgumentParser:
     '''GinjinnArgumentParser
 
     Class for setting up and handling commandline arguments.
@@ -27,23 +28,27 @@ class GinjinnArgumentParser():
 
     def __init__(self):
         self.parser = argparse.ArgumentParser(
-            description=self._description,
-            add_help=False
+            description=self._description, add_help=False
         )
         self.parser.add_argument(
-            '-d', '--debug',
-            help='Run in debug mode.',
-            action='store_true',
+            '-d', '--debug', help='Run in debug mode.', action='store_true',
         )
         self.parser.add_argument(
-            '-h', '--help',
-            action='help',
-            help='Show this help message and exit.',
+            '-h', '--help', action='help', help='Show this help message and exit.',
+        )
+
+        from ginjinn import __version__
+
+        self.parser.add_argument(
+            '-v',
+            '--version',
+            action='version',
+            version='%(prog)s {version}'.format(version=__version__),
+            help='Show program\'s version number and exit.',
         )
 
         self._subparsers = self.parser.add_subparsers(
-            dest='subcommand',
-            help='GinJinn subcommands.'
+            dest='subcommand', help='GinJinn subcommands.'
         )
         self._init_subparsers()
 

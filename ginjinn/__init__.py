@@ -15,7 +15,7 @@ Ott, T., C. Palm, R. Vogt, and C. Oberprieler. 2020. GinJinn: An object-detectio
 pipeline for automated feature extraction from herbarium specimens.
 Applications in Plant Sciences 2020 8(6).
 '''
-__version__ = '0.0.1'
+__version__ = '1.0.0'
 
 import pkg_resources
 
