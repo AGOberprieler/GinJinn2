@@ -46,15 +46,15 @@ Inside this folder, there is an "images" directory and an "annotations.json" fil
 The "images" folder contains the simulated images;
 "annotations.json" stores the corresponding instance-segmentation annotations in COCO format.
 
-You can use ``ginjinn info -a shapes_ds/annotations.json`` to display dataset statistics like the number of images and instances per category.
+You can use ``ginjinn info -I shapes_ds`` to display dataset statistics like the number of images and instances per category.
 
-**optional**: You can visualize annotations using the ``ginjinn utils vis`` command.
-The following command generates instance-segmentation visualizations (``-v segmentation``) for the simulated dataset (``-a shapes_ds/annotations.json``) in a new folder "shapes_ds_vis" (``-o shapes_ds_vis``).
+**optional**: You can visualize annotations using the ``ginjinn vis`` command.
+The following command generates instance-segmentation visualizations (``-v segmentation``) for the simulated dataset (``-I shapes_ds``) in a new folder "shapes_ds_vis" (``-o shapes_ds_vis``).
 
 .. code-block:: bash
 
-    ginjinn utils vis \
-        -a shapes_ds/annotations.json \
+    ginjinn vis \
+        -I shapes_ds \
         -o shapes_ds_vis \
         -v segmentation
 
@@ -77,7 +77,7 @@ Finally, the test set is used to get an unbiased measure of the model performanc
 
 
 GinJinn2 provides the ``ginjinn split`` command for splitting datasets in COCO or PASCAL VOC format.
-We will split the simulated data (``-a shapes_ds/annotation.json``) into sub-datasets such that 60% of the images are used for training, 20% for validation (``-v 0.2``), and 20% for testing (``-t 0.2``) of an instance-segmentation model (``-d instance-segmentation``).
+We will split the simulated data (``-I shapes_ds``) into sub-datasets such that 60% of the images are used for training, 20% for validation (``-v 0.2``), and 20% for testing (``-t 0.2``) of an instance-segmentation model (``-d instance-segmentation``).
 The output datasets will be written to a new folder "shapes_ds_split" (``-o shapes_ds_split``).
 GinJinn2 implements a randomized heuristic for splitting the data, which tries to evenly distribute instances from different categories.
 Thus, when executing the following command, you will be asked whether you want to accept the proposed split or try again.
@@ -85,7 +85,7 @@ Thus, when executing the following command, you will be asked whether you want t
 .. code-block:: bash
 
     ginjinn split \
-        -a shapes_ds/annotations.json \
+        -I shapes_ds \
         -o shapes_ds_split \
         -d instance-segmentation \
         -v 0.2 \
@@ -109,7 +109,7 @@ We will use ``ginjinn new`` to generate a new project "shapes_project" for insta
 
 .. code-block:: bash
 
-    ginjinn new shapes_project -t mask_rcnn_R_50_FPN_1x.yaml -d shapes_ds_split/
+    ginjinn new shapes_project -t mask_rcnn_R_50_FPN_1x.yaml -d shapes_ds_split
 
 After running the above command, there will a new folder "shapes_project". This folder contains the configuration file "ginjinn_config.yaml" and the empty "ouputs" folder.
 
@@ -194,9 +194,8 @@ By default, the predictions are written to the folder "predictions" inside the p
 an alternative output folder can be specified using the ``-o`` option.
 
 Let's predict instance segmentations for the test dataset.
-The ``-s`` option allows to specify a desired kind of prediction output.
 By default, a COCO annotation file (JSON) containing the segmentation and/or bounding-box predictions will be generated.
-For this example application, we will also use the visualization (``-s visualization``) and cropping (``-s cropped``) output options.
+For this example application, we will also use the visualization (``-v``) and cropping (``-c``) output options.
 
 The following command predicts instance segmentations for the test dataset and writes outputs to "shapes_prediction".
 
@@ -206,9 +205,8 @@ The following command predicts instance segmentations for the test dataset and w
         shapes_project \
         -i shapes_ds_split/test/images \
         -o shapes_prediction \
-        -s COCO \
-        -s cropped \
-        -s visualization
+        -c \
+        -v
 
 Visualizations of the predictions and cropped segmentation masks will look similar to this:
 
@@ -236,9 +234,8 @@ The command to generate the above predication was
         shapes_project \
         -i test_images \
         -o test_images_pred \
-        -s COCO \
-        -s cropped \
-        -s visualization \
+        -c \
+        -v \
         -r
 
 
