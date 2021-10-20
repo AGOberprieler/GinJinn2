@@ -17,9 +17,9 @@ GinJinn2 provides such functionality in two ways:
 #.  When predicting from a trained object detection model with ``ginjinn predict``, cropped objects (sub-images only) can be saved directly using the ``-c/--crop`` option.
 
 In either case, rectangular bounding boxes, each enclosing an object, are cropped from the original images.
-If you want to crop instance segmentations (``ginjinn utils crop --type segmentation ...``), GinJinn2 ignores the "bbox" entries from the annotation file and recalculates bounding boxes for cropping based on the "segmentation" entries instead.
+If you want to crop instance segmentations (``ginjinn utils crop -t segmentation ...``), GinJinn2 ignores the "bbox" entries from the annotation file and recalculates bounding boxes for cropping based on the "segmentation" entries instead.
 
-Both ``ginjinn utils crop`` and ``ginjinn predict`` allow to extend the cropping range beyond the bounding box of an object via the ``--padding`` option. If, for instance, the cropped images are intended to be used to train a model, it may be advisable to prevent objects from touching the image borders. To completely disable padding, simply specify ``--padding 0``.
+Both ``ginjinn utils crop`` and ``ginjinn predict`` allow to extend the cropping range beyond the bounding box of an object via the ``-p/--padding`` option. If, for instance, the cropped images are intended to be used to train a model, it may be advisable to prevent objects from touching the image borders. To completely disable padding, simply specify ``--padding 0``.
 
 Dataset Filtering
 -----------------
@@ -83,7 +83,7 @@ There are two requirements for the datasets to be merged:
 #.  They have to be of the same annotation type, i.e. COCO or Pascal VOC.
 #.  There must not be duplicated images or image file names. However, it is allowed two merge datasets sharing the same image directory.
 
-The following command could be used to revert the train/validation/test split from :ref:`Getting Started <3-getting_started_sim>`:
+The following command could be used to revert the train/validation/test split from :ref:`Getting Started <3-getting_started_split>`:
 
 .. code-block:: bash
 
@@ -128,7 +128,7 @@ This command prints a short overview about the contents of a dataset.
 It lists the number of images in the dataset and the number of annotated objects per category.
 Objects are further classified into segmented (#seg) and non-segmented (#bbox) ones.
 
-In case of our :ref:`simulated dataset <3-getting_started_sim>`, the output of ``ginjinn info -a shapes_ds/annotations.json`` would look like this:
+In case of our :ref:`simulated dataset <3-getting_started_sim>`, the output of ``ginjinn info -I shapes_ds`` would look like this:
 
 .. code-block:: none
 
