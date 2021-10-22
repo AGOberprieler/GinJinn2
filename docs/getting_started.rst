@@ -3,7 +3,7 @@
 Getting Started
 ===============
 
-Assuming that a compatible annotated dataset is available, the general GinJinn2 workflow consists of
+Assuming that a compatible annotated dataset is available (see :doc:`Dataset Annotation <annotation>`), the general GinJinn2 workflow consists of
 
 #.  train(-validation)-test split of the dataset
 #.  GinJinn2 project intialization

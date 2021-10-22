@@ -50,6 +50,9 @@ The latter, however, is only supported for bounding-box object detection.
             
 In case of nested image directories, ``ginjinn utils flatten`` helps to convert datasets to an accepted format.
 
+The :doc:`Dataset Annotation section <annotation>` describes how to generate such an annotated image dataset. 
+
+
 Basic workflow
 --------------
 
