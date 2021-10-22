@@ -1,9 +1,9 @@
-.. _2-overview:
+.. _overview:
 
 Overview
 ========
 
-After installation (:doc:`install instructions <1-installation>`), all GinJinn2 functionality can be accessed using the ``ginjinn`` commandline application.
+After installation (:doc:`install instructions <installation>`), all GinJinn2 functionality can be accessed using the ``ginjinn`` commandline application.
 
 Help
 ----
@@ -16,7 +16,7 @@ Help
 
 The help pages briefly describe basic functionality and command-specific arguments.
 
-.. _2-overview_ds_formats:
+.. _overview_ds_formats:
 
 Dataset formats
 ---------------
@@ -80,4 +80,4 @@ A basic object detection workflow consists of the following steps:
     It provides several optional types of output: a COCO annotation file, object visualization on the original images, and cropped images (segmentation masks) for each predicted object.
 
 
-Concrete workflows including more complex examples are described in :doc:`Getting Started <3-getting_started>` and :doc:`Example Applications <5-example_applications>`.
+Concrete workflows including more complex examples are described in :doc:`Getting Started <getting_started>` and :doc:`Example Applications <example_applications>`.

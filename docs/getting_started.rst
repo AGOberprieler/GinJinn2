@@ -1,4 +1,4 @@
-.. _3-getting_started:
+.. _getting_started:
 
 Getting Started
 ===============
@@ -17,13 +17,13 @@ In the following sections this workflow will be illustrated using a simulated da
 Preparation
 -----------
 
-First, make sure that GinJinn2 is installed (:doc:`install instructions <1-installation>`) and can be called from the terminal:
+First, make sure that GinJinn2 is installed (:doc:`install instructions <installation>`) and can be called from the terminal:
 
 .. code-block:: bash
 
     ginjinn -h
 
-.. _3-getting_started_sim:
+.. _getting_started_sim:
 
 Simulation
 ----------
@@ -66,7 +66,7 @@ The visualization of the simulated data will look similar to this:
 Now that we have an annotated dataset, we are ready to start with the GinJinn2 workflow.
 
 
-.. _3-getting_started_split:
+.. _getting_started_split:
 
 1. Train-Validation-Test Split
 ------------------------------
@@ -243,6 +243,6 @@ Conclusion
 ----------
 
 We have applied GinJinn2 for instance segmentation using simulated data.
-If you want to see how GinJinn2 can be used for object detection and instance segmentation with empirical data, have a look at the :doc:`Empirical Applications <5-example_applications>` document.
+If you want to see how GinJinn2 can be used for object detection and instance segmentation with empirical data, have a look at the :doc:`Empirical Applications <example_applications>` document.
 
-For information on GinJinn2 project configurations see :doc:`Project Configuration <6-project_configuration>`.
+For information on GinJinn2 project configurations see :doc:`Project Configuration <project_configuration>`.

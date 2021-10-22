@@ -1,9 +1,9 @@
-.. _4-toolbox:
+.. _toolbox:
 
 Toolbox
 =======
 
-The essential tools for working with `Detectron2 <https://github.com/facebookresearch/detectron2>`_'s object detection models, i.e. ``ginjinn new``, ``ginjinn train``, ``ginjinn evaluate``, and ``ginjinn predict``, have already been introduced in :doc:`Getting Started <3-getting_started>`.
+The essential tools for working with `Detectron2 <https://github.com/facebookresearch/detectron2>`_'s object detection models, i.e. ``ginjinn new``, ``ginjinn train``, ``ginjinn evaluate``, and ``ginjinn predict``, have already been introduced in :doc:`Getting Started <getting_started>`.
 Here, we give an overview over additional functionality provided by GinJinn2.
 For command-specific details, please also have a look at the corresponding help pages.
 
@@ -32,7 +32,7 @@ GinJinn2 offers two commands for dataset filtering:
 ginjinn utils filter_cat
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-For the simulated dataset created in :ref:`Getting Started <3-getting_started_sim>`, the following command could be used to create a new annotation file with only one object category "circle" (``-f circle``):
+For the simulated dataset created in :ref:`Getting Started <getting_started_sim>`, the following command could be used to create a new annotation file with only one object category "circle" (``-f circle``):
 
 .. code-block:: bash
 
@@ -54,7 +54,7 @@ ginjinn utils filter_size
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Annotated objects as a whole can by filtered using the ``-x/--min_width``, ``-y/--min_height``, and ``-r/--min_area`` options.
-In case of our :ref:`simulated dataset <3-getting_started_sim>`, the following command would discard objects with an area of less than 25 pixels (``-r 25``) and store the resulting, filtered annotations under "shapes_ds/annotations_filtered.json".
+In case of our :ref:`simulated dataset <getting_started_sim>`, the following command would discard objects with an area of less than 25 pixels (``-r 25``) and store the resulting, filtered annotations under "shapes_ds/annotations_filtered.json".
 
 .. code-block:: bash
 
@@ -83,7 +83,7 @@ There are two requirements for the datasets to be merged:
 #.  They have to be of the same annotation type, i.e. COCO or Pascal VOC.
 #.  There must not be duplicated images or image file names. However, it is allowed two merge datasets sharing the same image directory.
 
-The following command could be used to revert the train/validation/test split from :ref:`Getting Started <3-getting_started_split>`:
+The following command could be used to revert the train/validation/test split from :ref:`Getting Started <getting_started_split>`:
 
 .. code-block:: bash
 
@@ -110,7 +110,7 @@ Dataset Simulation
 To explore GinJinn2's functionality without having suitably formatted data available, artificial datasets can be generated with ``ginjinn simulate shapes``.
 This command allows to create noisy images containing annotated circles and triangles of varying size, color, orientation, and number.
 In case of simulated COCO datasets, the generated annotations comprise both bounding boxes and segmentation polygons while annotations in Pascal VOC format only contain the former.
-For an exemplary application see :ref:`Getting Started <3-getting_started_sim>`.
+For an exemplary application see :ref:`Getting Started <getting_started_sim>`.
 
 
 Dataset Summary
@@ -128,7 +128,7 @@ This command prints a short overview about the contents of a dataset.
 It lists the number of images in the dataset and the number of annotated objects per category.
 Objects are further classified into segmented (#seg) and non-segmented (#bbox) ones.
 
-In case of our :ref:`simulated dataset <3-getting_started_sim>`, the output of ``ginjinn info -I shapes_ds`` would look like this:
+In case of our :ref:`simulated dataset <getting_started_sim>`, the output of ``ginjinn info -I shapes_ds`` would look like this:
 
 .. code-block:: none
 
@@ -180,13 +180,13 @@ Currently, object occurrences are visualized by two commands:
 
 In both cases, Detectron2's visualization capabilities are used to store images overlaid by bounding boxes and segmentation polygons (if applicable).
 Each object is further labeled by its category and, in case of ``ginjinn predict``, by its confidence score.
-For an exemplary application see :ref:`Getting Started <3-getting_started_sim>`.
+For an exemplary application see :ref:`Getting Started <getting_started_sim>`.
 
 
 Dealing with Nested Image Directories
 -------------------------------------
 
-As illustrated in :ref:`Overview <2-overview_ds_formats>`, all images of a GinJinn2-compatible dataset have to be located within the same directory.
+As illustrated in :ref:`Overview <overview_ds_formats>`, all images of a GinJinn2-compatible dataset have to be located within the same directory.
 While image directories containing sub-directories cannot be used directly, they can be converted to a compatible format using ``ginjinn utils flatten``.
 This command can be used in two ways:
 
@@ -229,7 +229,7 @@ In both cases, slashes in the original image paths are replaced by some reserved
         └── Logfia~gallica~2.jpg
 
 
-.. _4-toolbox_sw_cropping:
+.. _toolbox_sw_cropping:
 
 Sliding-Window Cropping
 -----------------------
@@ -239,13 +239,13 @@ A way to circumvent this problem is to cut the original images into smaller sub-
 To avoid losing objects at the cutting sites, neighboring sub-images should have some overlap.
 ``ginjinn utils sw_split`` allows to split images and corresponding annotations (optional) into such sliding windows.
 
-For example, ``ginjinn utils sw_split -I shapes_ds -o shapes_sw`` could be used to crop our :ref:`simulated dataset <3-getting_started_sim>` into sliding windows.
+For example, ``ginjinn utils sw_split -I shapes_ds -o shapes_sw`` could be used to crop our :ref:`simulated dataset <getting_started_sim>` into sliding windows.
 If you also want to split your original dataset into train/validation/test datasets with ``ginjinn split``, this should be done before sliding-window cropping.
 Otherwise, due to the overlap between adjacent sliding windows, identical image regions may end up in different sub-datasets and thus distort the assessment of the models' generalization capability.
 For this reason, the ``-I`` option can also be used to provide input data with an existing train/validation/test split.
 
 Window size and overlap can be specified using the options ``-s/--window_size`` and ``-p/--overlap``, respectively.
-Ideally, the overlap between sliding windows should be chosen to be larger than the objects (see :ref:`Sliding-Window Merging <4-toolbox_sw_merge>`).
+Ideally, the overlap between sliding windows should be chosen to be larger than the objects (see :ref:`Sliding-Window Merging <toolbox_sw_merge>`).
 To ensure that all sub-images are of the same size, these may be filled up with black pixels ("padding") at the borders of an input image.
 
 Usually it is preferred to annotate not only complete objects inside an image, but also incomplete ones at the borders of an image.
@@ -254,7 +254,7 @@ If the user is only interested in complete objects (e.g. for the purpose of meas
 It is also possible to discard whole sub-images without annotated objects using ``-r/--remove_empty`` if desired. This may save computation time at the expense of prediction accuracy.
 
 
-.. _4-toolbox_sw_merge:
+.. _toolbox_sw_merge:
 
 Sliding-Window Merging
 ----------------------
@@ -281,5 +281,5 @@ Such problems can be avoided if the overlap between sliding windows is chosen to
 Train/Validation/Test-Splitting
 -------------------------------
 
-See :ref:`Getting Started <3-getting_started_split>`.
+See :ref:`Getting Started <getting_started_split>`.
 

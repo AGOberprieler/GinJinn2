@@ -14,12 +14,12 @@ GinJinn2 provides a collection of command-line tools for bounding-box object det
    :maxdepth: 1
    :caption: Contents:
 
-   1-installation.rst
-   2-overview.rst
-   3-getting_started.rst
-   4-toolbox.rst
-   5-example_applications.rst
-   6-project_configuration.rst
+   installation.rst
+   overview.rst
+   getting_started.rst
+   toolbox.rst
+   example_applications.rst
+   project_configuration.rst
 
 
 .. Indices and tables

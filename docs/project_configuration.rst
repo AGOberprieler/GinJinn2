@@ -1,4 +1,4 @@
-.. _6-project_configuration:
+.. _project_configuration:
 
 Project Configuration
 =====================
@@ -108,7 +108,7 @@ Example:
 
 Dataset type.
 Either "COCO" or "PVOC" for COCO and PASCAL VOC datasets, respectively.
-See :doc:`Overview <2-overview>` for a brief description of the dataset types.
+See :doc:`Overview <overview>` for a brief description of the dataset types.
 We recommend working with COCO datasets whenever possible.
 
 Example:

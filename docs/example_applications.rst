@@ -1,4 +1,4 @@
-.. _5-example_applications:
+.. _example_applications:
 
 Example Applications
 ====================
@@ -237,7 +237,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 Sliding-window cropping
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-We will now apply :ref:`Sliding-Window Cropping <4-toolbox_sw_cropping>` to be able to detect the small insects fixed on relatively large glue traps. 
+We will now apply :ref:`Sliding-Window Cropping <toolbox_sw_cropping>` to be able to detect the small insects fixed on relatively large glue traps. 
 The following command will split the original images into sliding windows of 1024x1024 pixels in size (:code:`-s 1024`)
 with an overlap of 256 pixels (:code:`-p 256`) between neighboring sliding windows.
 Annotations that are incomplete after the splitting, i.e. "cut-off" polygons, will be excluded (:code:`-c`).
