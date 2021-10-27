@@ -26,10 +26,13 @@ Since CVAT supports several other popular annotation formats, it provides good i
 Annotation with CVAT
 --------------------
 
+To install CVAT please follow the `official installation guide <https://openvinotoolkit.github.io/cvat/docs/administration/basics/installation/>`_.
+
 The following video shows how to get from a folder with images to an annotated dataset ready to use with GinJinn2.
 
 .. raw:: html
 
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        VIDEO COMING SOON
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/ml30nanHjlk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
+
