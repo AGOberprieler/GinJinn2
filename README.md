@@ -2,6 +2,7 @@
 
 ![GitHub](https://img.shields.io/github/license/agoberprieler/ginjinn_development)
 [![Documentation Status](https://readthedocs.org/projects/ginjinn2/badge/?version=latest)](https://ginjinn2.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/360878209.svg)](https://zenodo.org/badge/latestdoi/360878209)
 
 GinJinn2 provides a collection of command-line tools for bounding-box object detection and instance segmentation based on [Detectron2](https://github.com/facebookresearch/detectron2).
 Besides providing a convenient interface to the latter, GinJinn2 offers several utility functions to facilitate building custom pipelines.
