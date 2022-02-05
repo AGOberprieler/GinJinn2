@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         ginjinn-distribution: [ginjinn-gpu-pt16_cu92_linux]
     env:
       OS: ${{ matrix.os }}
