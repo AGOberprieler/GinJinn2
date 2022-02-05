@@ -3,6 +3,7 @@
 
 from ginjinn.commandline.argument_parser.argparse_utils import NewlineFormatter
 
+
 def setup_crop_parser(subparsers):
     '''setup_crop_parser
 
@@ -20,13 +21,13 @@ def setup_crop_parser(subparsers):
     '''
     parser = subparsers.add_parser(
         'crop',
-        help = '''
+        help='''
             Crop bounding boxes found in a COCO dataset as single images.
             This can be useful for multi-step pipelines, e.g. training a bounding box model
             based on the original images, and a segmentation model using the cropped bounding
             boxes.
         ''',
-        description = '''
+        description='''
             Crop bounding boxes found in a COCO dataset as single images.
             This can be useful for multi-step pipelines, e.g. training a bounding box model
             based on the original images, and a segmentation model using the cropped bounding
@@ -49,15 +50,17 @@ def setup_crop_parser(subparsers):
     required = parser.add_argument_group('required arguments')
 
     required.add_argument(
-        '-o', '--out_dir',
-        type = str,
-        help = '''
+        '-o',
+        '--out_dir',
+        type=str,
+        help='''
             Output directory.
         ''',
         required=True,
     )
     required.add_argument(
-        '-t', '--cropping_type',
+        '-t',
+        '--cropping_type',
         type=str,
         help='''
             Cropping type. When "segmentation" is selected,
@@ -67,29 +70,28 @@ def setup_crop_parser(subparsers):
         required=True,
     )
     required.add_argument(
-        '-I', '--dataset_dir',
-        type = str,
-        help = '''
-<<<<<<< HEAD
-            COCO dataset directory.
-=======
+        '-I',
+        '--dataset_dir',
+        type=str,
+        help='''
             Simple or split COCO dataset directory.
->>>>>>> cli-refactoring
         ''',
         required=False,
     )
     required.add_argument(
-        '-a', '--ann_path',
-        type = str,
-        help = '''
+        '-a',
+        '--ann_path',
+        type=str,
+        help='''
             COCO (JSON) annotation file. Can only be used with -i/--image_dir.
         ''',
         required=False,
     )
     required.add_argument(
-        '-i', '--image_dir',
-        type = str,
-        help = '''
+        '-i',
+        '--image_dir',
+        type=str,
+        help='''
             Image directory. Can only be used with -a/--ann_path.
         ''',
         required=False,
@@ -98,17 +100,16 @@ def setup_crop_parser(subparsers):
     # optional
     optional = parser.add_argument_group('optional arguments')
     optional.add_argument(
-        '-p', '--padding',
-        type = int,
-        help = '''
+        '-p',
+        '--padding',
+        type=int,
+        help='''
             Padding for cropping bounding boxes in pixels.
         ''',
         default=5,
     )
     optional.add_argument(
-        '-h', '--help',
-        action='help',
-        help='Show this help message and exit.'
+        '-h', '--help', action='help', help='Show this help message and exit.'
     )
 
     return parser
