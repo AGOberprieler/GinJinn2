@@ -15,6 +15,7 @@ from ginjinn.data_reader.load_datasets import load_train_val_sets
 
 from ginjinn.trainer.trainer import ValTrainer, Trainer
 
+
 @pytest.fixture(scope='module', autouse=True)
 def tmp_dir():
     tmpdir = tempfile.TemporaryDirectory()
@@ -22,6 +23,7 @@ def tmp_dir():
     yield tmpdir.name
 
     tmpdir.cleanup()
+
 
 @pytest.fixture(scope='module')
 def simulate_coco_train(tmp_dir):
@@ -32,9 +34,12 @@ def simulate_coco_train(tmp_dir):
     os.mkdir(img_dir)
     ann_path = os.path.join(sim_dir, 'annotations.json')
     generate_simple_shapes_coco(
-        img_dir=img_dir, ann_file=ann_path, n_images=40,
+        img_dir=img_dir,
+        ann_file=ann_path,
+        n_images=40,
     )
     return img_dir, ann_path
+
 
 @pytest.fixture(scope='module')
 def simulate_coco_validation(tmp_dir):
@@ -45,9 +50,12 @@ def simulate_coco_validation(tmp_dir):
     os.mkdir(img_dir)
     ann_path = os.path.join(sim_dir, 'annotations.json')
     generate_simple_shapes_coco(
-        img_dir=img_dir, ann_file=ann_path, n_images=20,
+        img_dir=img_dir,
+        ann_file=ann_path,
+        n_images=20,
     )
     return img_dir, ann_path
+
 
 @pytest.fixture(scope='module', autouse=True)
 def example_config(tmp_dir, simulate_coco_train, simulate_coco_validation):
@@ -55,11 +63,12 @@ def example_config(tmp_dir, simulate_coco_train, simulate_coco_validation):
     img_dir_validation, ann_path_validation = simulate_coco_validation
 
     example_config_1_path = pkg_resources.resource_filename(
-        'ginjinn', 'data/ginjinn_config/example_config_1.yaml',
+        'ginjinn',
+        'data/ginjinn_config/example_config_1.yaml',
     )
 
     with open(example_config_1_path) as config_f:
-        config = yaml.load(config_f)
+        config = yaml.safe_load(config_f)
 
     config['input']['training']['annotation_path'] = ann_path_train
     config['input']['training']['image_path'] = img_dir_train
@@ -68,7 +77,9 @@ def example_config(tmp_dir, simulate_coco_train, simulate_coco_validation):
     config['input']['validation']['annotation_path'] = ann_path_validation
     config['input']['validation']['image_path'] = img_dir_validation
 
-    config['augmentation'] = [aug for aug in config['augmentation'] if not 'crop' in list(aug.keys())[0]]
+    config['augmentation'] = [
+        aug for aug in config['augmentation'] if not 'crop' in list(aug.keys())[0]
+    ]
     # config['augmentation'] = [config['augmentation'][0]]
 
     config['training']['max_iter'] = 100
@@ -84,6 +95,7 @@ def example_config(tmp_dir, simulate_coco_train, simulate_coco_validation):
 
     return (config, config_file)
 
+
 def test_trainer(example_config):
     _, config_file = example_config
     config = GinjinnConfiguration.from_config_file(config_file)
@@ -98,9 +110,9 @@ def test_trainer(example_config):
         DatasetCatalog.remove('val')
     except:
         pass
-    
+
     load_train_val_sets(config)
-    
+
     try:
         trainer = ValTrainer.from_ginjinn_config(config)
         trainer.resume_or_load(resume=False)
