@@ -25,7 +25,7 @@ Once Conda ist installed run the following command to install GinJinn2 (insert y
 
 .. code-block:: bash
 
-    conda install -c agoberprieler -c conda-forge -c pytorch cudatoolkit=10.1 ginjinn2
+    conda install -c agoberprieler -c pytorch -c conda-forge cudatoolkit=10.1 ginjinn2
 
 Finally, test your installation:
 
