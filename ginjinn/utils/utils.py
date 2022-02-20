@@ -855,11 +855,13 @@ def visualize_annotations(
 
         # get segmentation masks if available
         if vis_type == 'segmentation':
-            segmentations = [ann['segmentation'] for ann in img_ann['annotations']]
+            segmentations = [ann.get('segmentation') for ann in img_ann['annotations'] if ann.get('segmentation')]
             masks = np.array([
                 imantics.Polygons(seg).mask(img.shape[1], img.shape[0]).array
                 for seg in segmentations
             ])
+            if masks.size == 0:
+                masks = None
         else:
             masks = None
 
