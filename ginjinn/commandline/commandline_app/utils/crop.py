@@ -65,6 +65,7 @@ def crop(
     image_dir: str,
     out_dir: str,
     padding: int,
+    masks: bool,
     cropping_type: str,
 ):
     '''crop
@@ -81,6 +82,8 @@ def crop(
         Output directory.
     padding : int
         Padding.
+    masks : bool
+        Write cropped segmentation masks along with the cropped images.
     cropping_type : str
         Cropping type.
     '''
@@ -98,6 +101,7 @@ def crop(
                 img_dir=image_dir,
                 outdir=out_dir,
                 padding=padding,
+                masks=masks,
                 progress_callback=pbar.update,
             )
     elif cropping_type == 'bbox':
@@ -132,6 +136,7 @@ def utils_crop(args):
 
     out_dir = args.out_dir
     padding = args.padding
+    masks = args.masks
     cropping_type = args.cropping_type
 
     from ginjinn.commandline.commandline_app.commandline_helpers import (
@@ -165,6 +170,7 @@ def utils_crop(args):
                     image_dir,
                     split_out_dir,
                     padding,
+                    masks,
                     cropping_type,
                 )
             print(
@@ -182,6 +188,7 @@ def utils_crop(args):
                 image_dir,
                 out_dir,
                 padding,
+                masks,
                 cropping_type,
             )
             print(
@@ -202,6 +209,7 @@ def utils_crop(args):
             image_dir,
             out_dir,
             padding,
+            masks,
             cropping_type,
         )
         print(

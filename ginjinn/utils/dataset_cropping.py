@@ -240,6 +240,7 @@ def crop_seg_from_coco(
     img_dir: str,
     outdir: str,
     padding: int = 0,
+    masks: bool = False,
     progress_callback: Optional[Callable] = None,
 ):
     """
@@ -259,6 +260,8 @@ def crop_seg_from_coco(
         This option allows to increase the cropping range beyond the borders of a segmented object.
         If possible, each side of the corresponding bounding box is shifted by the same number of
         pixels.
+    masks : bool
+        If true, cropped segmentation masks will be written as well.
     progress_callback : Optional[Callable]
         Callback for progress reporting.
 
@@ -271,6 +274,11 @@ def crop_seg_from_coco(
     os.makedirs(os.path.join(outdir, "images"), exist_ok=True)
     for path in glob.iglob(os.path.join(outdir, "images", "*")):
         os.remove(path)
+
+    if masks:
+        os.makedirs(os.path.join(outdir, "masks"), exist_ok=True)
+        for path in glob.iglob(os.path.join(outdir, "masks", "*")):
+            os.remove(path)
 
     info = {
         "contributor" : "",
@@ -361,8 +369,22 @@ def crop_seg_from_coco(
                 "license": img_coco.get("license")
             })
 
-            # annotate cropped instance
+            # crop segmentation mask
             mask_cropped = seg_mask[y1:y2, x1:x2]
+
+            if masks:
+                mask_name = "{}_{}.png".format(
+                    os.path.splitext(img_name)[0],
+                    obj_counter[annotation["image_id"]]
+                )
+                outpath = os.path.join(
+                    outdir,
+                    "masks",
+                    mask_name
+                )
+                cv2.imwrite(outpath, mask_cropped.astype("uint8") * 255)
+
+            # annotate cropped instance
             polygons_cropped = imantics.Mask(mask_cropped).polygons().segmentation
             # remove polygons with less than 3 points
             polygons_cropped = [p for p in polygons_cropped if len(p) >= 6]

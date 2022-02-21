@@ -109,6 +109,15 @@ def setup_crop_parser(subparsers):
         default=5,
     )
     optional.add_argument(
+        '-m',
+        '--masks',
+        help='''
+            Write cropped segmentation masks along with the cropped images.
+            (only relevant if the cropping type is "segmentation")
+        ''',
+        action='store_true',
+    )
+    optional.add_argument(
         '-h', '--help', action='help', help='Show this help message and exit.'
     )
 
