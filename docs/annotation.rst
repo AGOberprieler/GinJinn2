@@ -36,3 +36,36 @@ The following video shows how to get from a folder with images to an annotated d
         <iframe width="560" height="315" src="https://www.youtube.com/embed/ml30nanHjlk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
 
+Orientation issues
+------------------
+
+A common problem is that different programs do not handle existing EXIF metadata of images consistently. In particular, CVAT ignores orientation information stored in the EXIF data whereas GinJinn2 rotates the images accordingly. When using CVAT-annotated images as input to GinJinn2, this can lead to misplaced bounding boxes or segmentations.
+
+There a several simple ways to prevent this problem. **Please remember to backup your data before applying one of the commands below because they will overwrite the original images!**
+On Debian-based systems, both `ImageMagick <https://imagemagick.org/>`_ and `ExifTool <https://exiftool.org/>`_ are usually available from the distribution repositories and can, e.g., be installed with ``sudo apt update && apt install exiftool imagemagick``.
+
+#.  If you want to keep your images in the orientation specified by their EXIF metadata (which typically depends on how the camera was held), you could transform the images in a way such that the orientation tag becomes irrelevant (i.e., either "undefined" or "1"). This can, for example, be done with ImageMagick:
+
+    .. code-block:: bash
+
+        for f in images/*jpg; do
+            convert "$f" -auto-orient "$f"
+        done
+
+    The above shell command assumes that your images are in the "images" directory and have the filename extension "jpg".
+
+    Note: This solution is only useful **before** doing annotations with CVAT. If you have already annotated images and encounter orientation problems in GinJinn2, these can be fixed by the approach below.
+
+#.  If you want to keep your images as displayed by CVAT, you could simply delete the orientation information stored in the EXIF metadata. This can, for instance, be done with ExifTool:
+
+    .. code-block:: bash
+
+        exiftool -orientation#= -overwrite_original images/*jpg
+
+    As a more radical approach, you could also remove the complete EXIF metadata:
+
+    .. code-block:: bash
+
+        exiftool -EXIF= -overwrite_original images/*jpg
+
+    Again, the above shell commands assume that your images are in the "images" directory and have the filename extension "jpg".
