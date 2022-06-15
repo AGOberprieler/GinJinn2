@@ -150,7 +150,14 @@ class GinjinnPredictor:
 
         # get image names
         if not img_names:
-            patterns = ("*.jpg", "*.jpeg", "*.JPG", "*.JPEG", '*.png', '*.PNG')
+            patterns = (
+                "[!._]*.jpg",
+                "[!._]*.jpeg",
+                "[!._]*.JPG",
+                "[!._]*.JPEG",
+                '[!._]*.png',
+                '[!._]*.PNG',
+            )
             img_paths = []
             for pat in patterns:
                 img_paths.extend(glob.glob(os.path.join(self.img_dir, pat)))
