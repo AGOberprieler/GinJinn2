@@ -24,7 +24,8 @@ from ginjinn.ginjinn_config import GinjinnConfiguration
 from ginjinn.utils.utils import bbox_from_polygons
 import warnings
 
-class GinjinnPredictor():
+
+class GinjinnPredictor:
     '''A class for predicting from a trained Detectron2 model.
 
     Parameters
@@ -40,13 +41,9 @@ class GinjinnPredictor():
     task : str
         "bbox-detection" or "instance-segmentation"
     '''
+
     def __init__(
-        self,
-        cfg: CfgNode,
-        class_names: List[str],
-        img_dir: str,
-        outdir: str,
-        task: str
+        self, cfg: CfgNode, class_names: List[str], img_dir: str, outdir: str, task: str
     ):
         self.class_names = class_names
         self.d2_cfg = cfg
@@ -87,13 +84,8 @@ class GinjinnPredictor():
         d2_cfg.MODEL.WEIGHTS = os.path.join(d2_cfg.OUTPUT_DIR, checkpoint_name)
 
         return cls(
-            d2_cfg,
-            get_class_names(gj_cfg.project_dir),
-            img_dir,
-            outdir,
-            gj_cfg.task
+            d2_cfg, get_class_names(gj_cfg.project_dir), img_dir, outdir, gj_cfg.task
         )
-
 
     def predict(
         self,
@@ -158,7 +150,7 @@ class GinjinnPredictor():
 
         # get image names
         if not img_names:
-            patterns = ("*.jpg", "*.jpeg", "*.JPG", "*.JPEG")
+            patterns = ("*.jpg", "*.jpeg", "*.JPG", "*.JPEG", '*.png', '*.PNG')
             img_paths = []
             for pat in patterns:
                 img_paths.extend(glob.glob(os.path.join(self.img_dir, pat)))
@@ -178,14 +170,31 @@ class GinjinnPredictor():
                 predictions = d2_predictor(image)
 
                 # convert to numpy arrays
-                boxes = predictions["instances"].get_fields()["pred_boxes"].to("cpu").tensor.numpy()
-                classes = predictions["instances"].get_fields()["pred_classes"].to("cpu").numpy()
-                scores = predictions["instances"].get_fields()["scores"].to("cpu").numpy()
+                boxes = (
+                    predictions["instances"]
+                    .get_fields()["pred_boxes"]
+                    .to("cpu")
+                    .tensor.numpy()
+                )
+                classes = (
+                    predictions["instances"]
+                    .get_fields()["pred_classes"]
+                    .to("cpu")
+                    .numpy()
+                )
+                scores = (
+                    predictions["instances"].get_fields()["scores"].to("cpu").numpy()
+                )
 
                 if self.task == "instance-segmentation":
-                    masks = predictions["instances"].get_fields()["pred_masks"].to("cpu").numpy()
+                    masks = (
+                        predictions["instances"]
+                        .get_fields()["pred_masks"]
+                        .to("cpu")
+                        .numpy()
+                    )
                 else:
-                    masks = None # np.array([])
+                    masks = None  # np.array([])
 
                 pickle.dump(boxes, tmpfile)
                 pickle.dump(classes, tmpfile)
@@ -219,7 +228,7 @@ class GinjinnPredictor():
                         masks[i_mask] = refiner.refine(
                             image,
                             mask.astype("int") * 255,
-                            fast = True if refinement_method=="fast" else False
+                            fast=True if refinement_method == "fast" else False,
                         )
 
                 if self.task == "instance-segmentation":
@@ -235,13 +244,19 @@ class GinjinnPredictor():
                             boxes[i_mask] = [0, 0, 0, 0]
 
                 if "COCO" in output_options:
-                    self._update_coco("annotations", image, img_name, i_img + 1, boxes, classes, masks)
+                    self._update_coco(
+                        "annotations", image, img_name, i_img + 1, boxes, classes, masks
+                    )
 
                 if "cropped" in output_options:
-                    self._save_cropped(image, img_name, i_img + 1, boxes, classes, masks, padding)
+                    self._save_cropped(
+                        image, img_name, i_img + 1, boxes, classes, masks, padding
+                    )
 
                 if "visualization" in output_options:
-                    self._save_visualization(image, img_name, scores, classes, boxes, masks)
+                    self._save_visualization(
+                        image, img_name, scores, classes, boxes, masks
+                    )
 
                 if progress_callback:
                     progress_callback(1)
@@ -258,7 +273,6 @@ class GinjinnPredictor():
             refiner = None
             torch.cuda.empty_cache()
 
-
     def _save_visualization(
         self,
         image: np.ndarray,
@@ -266,7 +280,7 @@ class GinjinnPredictor():
         scores: np.ndarray,
         classes: np.ndarray,
         boxes: np.ndarray,
-        masks: Optional[np.ndarray] = None
+        masks: Optional[np.ndarray] = None,
     ):
 
         # not existing before
@@ -274,18 +288,15 @@ class GinjinnPredictor():
 
         visualizer = GJ_Visualizer(
             image[:, :, ::-1],
-            metadata = MetadataCatalog.get("pred"),
-            instance_mode = ColorMode.IMAGE_BW
+            metadata=MetadataCatalog.get("pred"),
+            instance_mode=ColorMode.IMAGE_BW,
         )
-        vis_image = visualizer.draw_instance_predictions_gj(scores, classes, boxes, self.class_names, masks)
+        vis_image = visualizer.draw_instance_predictions_gj(
+            scores, classes, boxes, self.class_names, masks
+        )
 
-        outpath = os.path.join(
-            self.outdir,
-            "visualization",
-            img_name
-        )
+        outpath = os.path.join(self.outdir, "visualization", img_name)
         vis_image.save(outpath)
-
 
     def _save_cropped(
         self,
@@ -295,7 +306,7 @@ class GinjinnPredictor():
         boxes: np.ndarray,
         classes: List[str],
         masks: Optional[np.ndarray] = None,
-        padding: int = 5
+        padding: int = 5,
     ):
 
         height, width = image.shape[:2]
@@ -310,7 +321,7 @@ class GinjinnPredictor():
             outpath = os.path.join(
                 self.outdir,
                 "images_cropped",
-                "{}_{}.jpg".format(os.path.splitext(img_name)[0], i_inst + 1)
+                "{}_{}.jpg".format(os.path.splitext(img_name)[0], i_inst + 1),
             )
             cv2.imwrite(outpath, image_cropped)
 
@@ -319,7 +330,7 @@ class GinjinnPredictor():
                 outpath = os.path.join(
                     self.outdir,
                     "masks_cropped",
-                    "{}_{}.png".format(os.path.splitext(img_name)[0], i_inst + 1)
+                    "{}_{}.png".format(os.path.splitext(img_name)[0], i_inst + 1),
                 )
                 cv2.imwrite(outpath, mask_cropped.astype("uint8") * 255)
 
@@ -342,9 +353,8 @@ class GinjinnPredictor():
                     len(self._coco_images["annotations_cropped"]) + 1,
                     np.expand_dims(box, axis=0),
                     np.expand_dims(classes[i_inst], axis=0),
-                    np.expand_dims(mask_cropped, axis=0)
+                    np.expand_dims(mask_cropped, axis=0),
                 )
-
 
     def _update_coco(
         self,
@@ -354,25 +364,27 @@ class GinjinnPredictor():
         img_id: int,
         boxes: np.ndarray,
         classes: List[str],
-        masks: Optional[np.ndarray] = None
+        masks: Optional[np.ndarray] = None,
     ):
 
         height, width = image.shape[:2]
 
-        self._coco_images[name].append({
-            "id": img_id,
-            "file_name": img_name,
-            "coco_url": "",
-            "date_captured": "",
-            "flickr_url": "",
-            "height": height,
-            "width": width,
-            "license": 1
-        })
+        self._coco_images[name].append(
+            {
+                "id": img_id,
+                "file_name": img_name,
+                "coco_url": "",
+                "date_captured": "",
+                "flickr_url": "",
+                "height": height,
+                "width": width,
+                "license": 1,
+            }
+        )
 
         for i_inst, bbox in enumerate(boxes):
             bbox = bbox.tolist()
-            bbox_coco = [ bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1] ]
+            bbox_coco = [bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1]]
 
             anno = {
                 "area": (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]),
@@ -380,7 +392,7 @@ class GinjinnPredictor():
                 "iscrowd": 0,
                 "image_id": img_id,
                 "id": len(self._coco_annotations[name]) + 1,
-                "category_id": classes[i_inst].tolist() + 1
+                "category_id": classes[i_inst].tolist() + 1,
             }
 
             if self.task == "instance-segmentation":
@@ -389,41 +401,43 @@ class GinjinnPredictor():
                 # remove polygons with less than 3 points
                 anno["segmentation"] = [p for p in ipoly.segmentation if len(p) >= 6]
                 # recalculate bounding box
-                anno["bbox"] = bbox_from_polygons(anno["segmentation"], fmt="xywh").tolist()
+                anno["bbox"] = bbox_from_polygons(
+                    anno["segmentation"], fmt="xywh"
+                ).tolist()
                 anno["area"] = anno["bbox"][2] * anno["bbox"][3]
 
             self._coco_annotations[name].append(anno)
 
-
     def _save_coco(self, name: str):
         info = {
-            "contributor" : "",
-            "date_created" : datetime.datetime.now().strftime("%Y/%m/%d"),
-            "description" : "",
-            "version" : "",
-            "url" : "",
-            "year" : ""
+            "contributor": "",
+            "date_created": datetime.datetime.now().strftime("%Y/%m/%d"),
+            "description": "",
+            "version": "",
+            "url": "",
+            "year": "",
         }
         licenses = [{"id": 1, "name": "", "url": ""}]
         categories = [
-            {"id": i+1, "name": cl, "supercategory": ""} for (i, cl) in enumerate(self.class_names)
+            {"id": i + 1, "name": cl, "supercategory": ""}
+            for (i, cl) in enumerate(self.class_names)
         ]
 
         # write COCO annotation file
         json_new = os.path.join(self.outdir, name + ".json")
         with open(json_new, 'w') as json_file:
-            json.dump({
-                'info': info,
-                'licenses': licenses,
-                'images': self._coco_images[name],
-                'annotations': self._coco_annotations[name],
-                'categories': categories
+            json.dump(
+                {
+                    'info': info,
+                    'licenses': licenses,
+                    'images': self._coco_images[name],
+                    'annotations': self._coco_annotations[name],
+                    'categories': categories,
                 },
                 json_file,
                 indent=2,
-                sort_keys=True
+                sort_keys=True,
             )
-
 
     def _clear_coco(self, name: str):
         self._coco_annotations[name] = []
@@ -431,8 +445,7 @@ class GinjinnPredictor():
 
 
 class GJ_Visualizer(Visualizer):
-    """Modified version of Detectron2's Visualizer class.
-    """
+    """Modified version of Detectron2's Visualizer class."""
 
     def draw_instance_predictions_gj(
         self,
@@ -441,7 +454,7 @@ class GJ_Visualizer(Visualizer):
         boxes: np.ndarray,
         class_names: List[str],
         masks: Optional[np.ndarray] = None,
-        alpha: Union[int, float] = 0.2
+        alpha: Union[int, float] = 0.2,
     ) -> VisImage:
         """
         Modification of Detectron2's draw_instance_predictions() using differently formatted inputs.
@@ -479,12 +492,13 @@ class GJ_Visualizer(Visualizer):
             self.output = VisImage(img_bw)
 
         self.overlay_instances(
-            masks = None if masks is None
-                else [GenericMask(x, self.output.height, self.output.width) for x in masks],
-            boxes = boxes,
-            labels = labels,
-            keypoints = None,
-            assigned_colors = colors,
-            alpha = alpha,
+            masks=None
+            if masks is None
+            else [GenericMask(x, self.output.height, self.output.width) for x in masks],
+            boxes=boxes,
+            labels=labels,
+            keypoints=None,
+            assigned_colors=colors,
+            alpha=alpha,
         )
         return self.output
