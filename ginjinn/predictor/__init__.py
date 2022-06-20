@@ -1,4 +1,4 @@
 ''' Predictor module
 '''
 
-from .predictors import GinjinnPredictor
+from .predictors import GinjinnPredictor, SimpleGinjinnPredictor

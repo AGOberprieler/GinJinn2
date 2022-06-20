@@ -21,7 +21,8 @@ TASKS = [
     'instance-segmentation',
 ]
 
-class GinjinnConfiguration: #pylint: disable=too-many-arguments,too-many-instance-attributes
+
+class GinjinnConfiguration:  # pylint: disable=too-many-arguments,too-many-instance-attributes
     '''GinJinn configuration class.
 
     A class representing the configuration of a GinJinn project.
@@ -51,6 +52,7 @@ class GinjinnConfiguration: #pylint: disable=too-many-arguments,too-many-instanc
     InvalidGinjinnConfigurationError
         If any of the general configuration is contradictionary or malformed.
     '''
+
     def __init__(
         self,
         project_dir: str,
@@ -60,8 +62,9 @@ class GinjinnConfiguration: #pylint: disable=too-many-arguments,too-many-instanc
         training_configuration: GinjinnTrainingConfiguration,
         augmentation_configuration: GinjinnAugmentationConfiguration,
         detectron_configuration: GinjinnDetectronConfiguration = GinjinnDetectronConfiguration(),
-        options_configuration: GinjinnOptionsConfiguration =
-            GinjinnOptionsConfiguration.from_dictionary({}),
+        options_configuration: GinjinnOptionsConfiguration = GinjinnOptionsConfiguration.from_dictionary(
+            {}
+        ),
     ):
         self.project_dir = project_dir
         self.task = task
@@ -134,9 +137,7 @@ class GinjinnConfiguration: #pylint: disable=too-many-arguments,too-many-instanc
             config['input'],
             project_dir=project_dir,
         )
-        model_configuration = GinjinnModelConfiguration.from_dictionary(
-            config['model']
-        )
+        model_configuration = GinjinnModelConfiguration.from_dictionary(config['model'])
         training_configuration = GinjinnTrainingConfiguration.from_dictionary(
             config.get('training', {})
         )
@@ -162,7 +163,10 @@ class GinjinnConfiguration: #pylint: disable=too-many-arguments,too-many-instanc
         )
 
     @classmethod
-    def from_config_file(cls, file_path: str):
+    def from_config_file(
+        cls,
+        file_path: str,
+    ):
         '''Build GinjinnConfiguration from YAML configuration file.
 
         Parameters
@@ -201,6 +205,8 @@ class GinjinnConfiguration: #pylint: disable=too-many-arguments,too-many-instanc
 
         model_tasks = MODELS[self.model.name]['tasks']
         if not self.task in model_tasks:
-            err_msg = f'Task "{self.task}" is incompatible with model ' +\
-                f'"{self.model.name}" (available tasks: {", ".join(model_tasks)}).'
+            err_msg = (
+                f'Task "{self.task}" is incompatible with model '
+                + f'"{self.model.name}" (available tasks: {", ".join(model_tasks)}).'
+            )
             raise InvalidGinjinnConfigurationError(err_msg)
