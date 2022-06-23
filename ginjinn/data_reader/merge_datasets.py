@@ -14,10 +14,7 @@ from ginjinn.data_reader.data_error import IncompatibleDatasetsError
 
 
 def merge_datasets_pvoc(
-    ann_dirs: List[str],
-    img_dirs: List[str],
-    outdir: str,
-    link_images: bool=True
+    ann_dirs: List[str], img_dirs: List[str], outdir: str, link_images: bool = True
 ):
     """Combine multiple datasets with annotations in PascalVOC format.
 
@@ -38,28 +35,28 @@ def merge_datasets_pvoc(
     # create/clean new annotation directory
     ann_outdir = os.path.join(outdir, "annotations")
     os.makedirs(ann_outdir, exist_ok=True)
-    for path in glob.iglob(os.path.join(ann_outdir, "*")):
+    for path in glob.iglob(os.path.join(ann_outdir, "[!._]*")):
         os.remove(path)
 
     # create/clean new image directory
     img_outdir = os.path.join(outdir, "images")
     os.makedirs(img_outdir, exist_ok=True)
-    for path in glob.iglob(os.path.join(img_outdir, "*")):
+    for path in glob.iglob(os.path.join(img_outdir, "[!._]*")):
         os.remove(path)
 
     # find images
-    extensions = ("jpg", "jpeg", "JPG", "JPEG")
+    extensions = ("jpg", "jpeg", "JPG", "JPEG", "png", "PNG")
     img_paths = []
     for img_dir in img_dirs:
         for ext in extensions:
-            img_paths.extend(glob.glob(os.path.join(img_dir, "*." + ext)))
+            img_paths.extend(glob.glob(os.path.join(img_dir, "[!._]*." + ext)))
 
     # find annotation files
     extensions = ("xml", "XML")
     ann_paths = []
     for ann_dir in ann_dirs:
         for ext in extensions:
-            ann_paths.extend(glob.glob(os.path.join(ann_dir, "*." + ext)))
+            ann_paths.extend(glob.glob(os.path.join(ann_dir, "[!._]*." + ext)))
 
     # check for duplicate images
     hashes = dict()
@@ -97,7 +94,7 @@ def merge_datasets_pvoc(
 
     # write annotations
     for ann_dir in ann_dirs:
-        for ann_file in glob.glob(os.path.join(ann_dir, "*.xml")):
+        for ann_file in glob.glob(os.path.join(ann_dir, "[!._]*.xml")):
             tree = ET.parse(ann_file)
             root = tree.getroot()
 
@@ -120,10 +117,7 @@ def merge_datasets_pvoc(
 
 
 def merge_datasets_coco(
-    ann_files: List[str],
-    img_dirs: List[str],
-    outdir: str,
-    link_images: bool=True
+    ann_files: List[str], img_dirs: List[str], outdir: str, link_images: bool = True
 ):
     """Combine multiple datasets with annotations in COCO format.
 
@@ -147,11 +141,11 @@ def merge_datasets_coco(
         os.remove(path)
 
     # find images
-    extensions = ("jpg", "jpeg", "JPG", "JPEG")
+    extensions = ("jpg", "jpeg", "JPG", "JPEG", "png", "PNG")
     img_paths = []
     for img_dir in img_dirs:
         for ext in extensions:
-            img_paths.extend(glob.glob(os.path.join(img_dir, "*." + ext)))
+            img_paths.extend(glob.glob(os.path.join(img_dir, "[!._]*." + ext)))
 
     # check for duplicate images
     hashes = dict()
@@ -188,12 +182,12 @@ def merge_datasets_coco(
     # combine json files:
 
     info = {
-        "contributor" : "",
-        "date_created" : datetime.datetime.now().strftime("%Y/%m/%d"),
-        "description" : "",
-        "version" : "",
-        "url" : "",
-        "year" : ""
+        "contributor": "",
+        "date_created": datetime.datetime.now().strftime("%Y/%m/%d"),
+        "description": "",
+        "version": "",
+        "url": "",
+        "year": "",
     }
 
     # name -> COCO entry
@@ -207,22 +201,24 @@ def merge_datasets_coco(
         with open(ann_file, "rb") as f:
             ann = json.load(f)
 
-            id_to_lic = dict() # old mapping
+            id_to_lic = dict()  # old mapping
             for license in ann.get("licenses"):
                 id_to_lic[license["id"]] = license["name"]
                 if license["name"] not in dict_licenses:
                     dict_licenses[license["name"]] = license
                     dict_licenses[license["name"]]["id"] = len(dict_licenses)
 
-            id_to_img = dict() # old mapping
+            id_to_img = dict()  # old mapping
             for image in ann.get("images"):
                 id_to_img[image["id"]] = image["file_name"]
                 dict_images[image["file_name"]] = image
                 dict_images[image["file_name"]]["id"] = len(dict_images)
                 license = id_to_lic[image["license"]]
-                dict_images[image["file_name"]]["license"] = dict_licenses[license]["id"]
+                dict_images[image["file_name"]]["license"] = dict_licenses[license][
+                    "id"
+                ]
 
-            id_to_cat = dict() # old mapping
+            id_to_cat = dict()  # old mapping
             for category in ann.get("categories"):
                 id_to_cat[category["id"]] = category["name"]
                 if category["name"] not in dict_categories:
@@ -240,21 +236,22 @@ def merge_datasets_coco(
 
                 annotations.append(annotation)
 
-    licenses = sorted(list(dict_licenses.values()), key=lambda d:d["id"])
-    images = sorted(list(dict_images.values()), key=lambda d:d["id"])
-    categories = sorted(list(dict_categories.values()), key=lambda d:d["id"])
+    licenses = sorted(list(dict_licenses.values()), key=lambda d: d["id"])
+    images = sorted(list(dict_images.values()), key=lambda d: d["id"])
+    categories = sorted(list(dict_categories.values()), key=lambda d: d["id"])
 
     # write COCO annotation file
     json_new = os.path.join(outdir, "annotations.json")
     with open(json_new, 'w') as json_file:
-        json.dump({
-            'info': info,
-            'licenses': licenses,
-            'images': images,
-            'annotations': annotations,
-            'categories': categories
+        json.dump(
+            {
+                'info': info,
+                'licenses': licenses,
+                'images': images,
+                'annotations': annotations,
+                'categories': categories,
             },
             json_file,
-            indent = 2,
-            sort_keys = True
+            indent=2,
+            sort_keys=True,
         )
