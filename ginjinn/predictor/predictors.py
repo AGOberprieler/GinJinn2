@@ -253,12 +253,12 @@ class GinjinnPredictor:
 
                 if "COCO" in output_options:
                     self._update_coco(
-                        "annotations", image, img_name, i_img + 1, boxes, classes, masks
+                        "annotations", image, img_name, i_img + 1, boxes, scores, classes, masks
                     )
 
                 if "cropped" in output_options:
                     self._save_cropped(
-                        image, img_name, i_img + 1, boxes, classes, masks, padding
+                        image, img_name, i_img + 1, boxes, scores, classes, masks, padding
                     )
 
                 if "visualization" in output_options:
@@ -312,6 +312,7 @@ class GinjinnPredictor:
         img_name: str,
         img_id: int,
         boxes: np.ndarray,
+        scores: np.ndarray,
         classes: List[str],
         masks: Optional[np.ndarray] = None,
         padding: int = 5,
@@ -360,6 +361,7 @@ class GinjinnPredictor:
                     "img_{}_{}.jpg".format(img_id, i_inst + 1),
                     len(self._coco_images["annotations_cropped"]) + 1,
                     np.expand_dims(box, axis=0),
+                    np.expand_dims(scores[i_inst], axis=0),
                     np.expand_dims(classes[i_inst], axis=0),
                     np.expand_dims(mask_cropped, axis=0),
                 )
@@ -371,6 +373,7 @@ class GinjinnPredictor:
         img_name: str,
         img_id: int,
         boxes: np.ndarray,
+        scores: np.ndarray,
         classes: List[str],
         masks: Optional[np.ndarray] = None,
     ):
@@ -397,6 +400,7 @@ class GinjinnPredictor:
             anno = {
                 "area": (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]),
                 "bbox": bbox_coco,
+                "score": scores[i_inst],
                 "iscrowd": 0,
                 "image_id": img_id,
                 "id": len(self._coco_annotations[name]) + 1,
