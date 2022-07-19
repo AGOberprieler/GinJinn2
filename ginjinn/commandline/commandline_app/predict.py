@@ -6,6 +6,7 @@ import sys
 from ginjinn.ginjinn_config import GinjinnConfiguration
 import ginjinn.ginjinn_config.config_error as config_error
 
+
 def ginjinn_predict(args):
     '''ginjinn_predict
 
@@ -65,18 +66,17 @@ def ginjinn_predict(args):
 
     # checkpoint
     checkpoint_name = args.weights_checkpoint
-    checkpoint_file = os.path.join(
-        config.project_dir, 'outputs', checkpoint_name
-    )
+    checkpoint_file = os.path.join(config.project_dir, 'outputs', checkpoint_name)
     if not os.path.isfile(checkpoint_file):
         print(
-            f'\nERROR: Checkpoint "{checkpoint_name}" (expected location: {checkpoint_file}) ' +\
-            'does not exist. Please pass a valid checkpoint name.'
+            f'\nERROR: Checkpoint "{checkpoint_name}" (expected location: {checkpoint_file}) '
+            + 'does not exist. Please pass a valid checkpoint name.'
         )
         sys.exit(1)
 
     # output
     from ginjinn.commandline.commandline_app.commandline_helpers import prepare_out_dir
+
     out_dir = args.out_dir
     if out_dir is None:
         out_dir = os.path.join(config.project_dir, 'prediction')
@@ -98,17 +98,26 @@ def ginjinn_predict(args):
         output_options.append('visualization')
 
     from ginjinn.predictor import GinjinnPredictor
+
     predictor = GinjinnPredictor.from_ginjinn_config(
         gj_cfg=config,
         img_dir=img_dir,
         outdir=out_dir,
         checkpoint_name=checkpoint_name,
     )
+    predictor.save_scores = args.coco_scores
 
     from ginjinn.utils import get_image_files
-    from ginjinn.commandline.commandline_app.commandline_helpers import MultistepProgressBars
+    from ginjinn.commandline.commandline_app.commandline_helpers import (
+        MultistepProgressBars,
+    )
+
     totals = [len(get_image_files(img_dir))] * 2
-    descs = ['prediction', 'refinement + output gen.'] if seg_refinement else ['prediction', 'output gen.']
+    descs = (
+        ['prediction', 'refinement + output gen.']
+        if seg_refinement
+        else ['prediction', 'output gen.']
+    )
 
     with MultistepProgressBars(totals=totals, descs=descs, units='image') as pbars:
         predictor.predict(

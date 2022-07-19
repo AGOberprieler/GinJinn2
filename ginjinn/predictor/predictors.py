@@ -9,7 +9,7 @@ import json
 import os
 import pickle
 from tempfile import NamedTemporaryFile
-from typing import Callable, Iterable, List, Optional, Union
+from typing import Callable, Iterable, List, Optional, Union, Tuple, Dict, Any
 import numpy as np
 import cv2
 import imantics
@@ -44,15 +44,22 @@ class GinjinnPredictor:
     '''
 
     def __init__(
-        self, cfg: CfgNode, class_names: List[str], img_dir: str, outdir: str, task: str
+        self,
+        cfg: CfgNode,
+        class_names: List[str],
+        img_dir: str,
+        outdir: str,
+        task: str,
+        save_scores: bool = False,
     ):
         self.class_names = class_names
         self.d2_cfg = cfg
         self.img_dir = img_dir
         self.outdir = outdir
         self.task = task
-        self._coco_annotations = dict()
-        self._coco_images = dict()
+        self._coco_annotations: Dict[str, Any] = dict()
+        self._coco_images: Dict[str, Any] = dict()
+        self.save_scores = save_scores
 
     @classmethod
     def from_ginjinn_config(
@@ -215,6 +222,7 @@ class GinjinnPredictor:
             d2_predictor = None
             torch.cuda.empty_cache()
 
+            refiner: Optional[refine.Refiner] = None
             if self.task == "instance-segmentation" and seg_refinement:
                 refiner = refine.Refiner(device=refinement_device)
 
@@ -232,6 +240,11 @@ class GinjinnPredictor:
                 scores = pickle.load(tmpfile)
 
                 if seg_refinement:
+                    if refiner is None:
+                        # Note: this should never happen but is required for mypy's type checking.
+                        raise RuntimeError(
+                            'seg_refinement is activated but no refiner provided.'
+                        )
                     for i_mask, mask in enumerate(masks):
                         masks[i_mask] = refiner.refine(
                             image,
@@ -253,12 +266,26 @@ class GinjinnPredictor:
 
                 if "COCO" in output_options:
                     self._update_coco(
-                        "annotations", image, img_name, i_img + 1, boxes, scores, classes, masks
+                        "annotations",
+                        image,
+                        img_name,
+                        i_img + 1,
+                        boxes,
+                        scores,
+                        classes,
+                        masks,
                     )
 
                 if "cropped" in output_options:
                     self._save_cropped(
-                        image, img_name, i_img + 1, boxes, scores, classes, masks, padding
+                        image,
+                        img_name,
+                        i_img + 1,
+                        boxes,
+                        scores,
+                        classes,
+                        masks,
+                        padding,
                     )
 
                 if "visualization" in output_options:
@@ -335,6 +362,10 @@ class GinjinnPredictor:
             cv2.imwrite(outpath, image_cropped)
 
             if self.task == "instance-segmentation":
+                if masks is None:
+                    raise RuntimeError(
+                        'task is "instance-segmentation" but no masks provided.'
+                    )
                 mask_cropped = masks[i_inst][y1:y2, x1:x2]
                 outpath = os.path.join(
                     self.outdir,
@@ -374,7 +405,7 @@ class GinjinnPredictor:
         img_id: int,
         boxes: np.ndarray,
         scores: np.ndarray,
-        classes: List[str],
+        classes: np.ndarray,
         masks: Optional[np.ndarray] = None,
     ):
 
@@ -400,14 +431,20 @@ class GinjinnPredictor:
             anno = {
                 "area": (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]),
                 "bbox": bbox_coco,
-                "score": scores[i_inst],
                 "iscrowd": 0,
                 "image_id": img_id,
                 "id": len(self._coco_annotations[name]) + 1,
                 "category_id": classes[i_inst].tolist() + 1,
             }
 
+            if self.save_scores:
+                anno["score"] = float(scores[i_inst])
+
             if self.task == "instance-segmentation":
+                if masks is None:
+                    raise RuntimeError(
+                        'task is "instance-segmentation" but no masks provided.'
+                    )
                 imask = imantics.Mask(masks[i_inst])
                 ipoly = imask.polygons()
                 # remove polygons with less than 3 points
@@ -602,11 +639,12 @@ class SimpleGinjinnPredictor:
         seg_refinement: bool = False,
         refinement_device: str = "cuda:0",
         refinement_method: str = "full",
-    ):
+    ) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray], np.ndarray]:
         """
-        img_names : list of str, default=[]
-            File names of images to be used as input. By default, all images within self.img_dir
-            will be used.
+        Parameters
+        ----------
+        image : np.ndarray
+            A single image.
         threshold : float or int, default=0.8
             Minimum score of predicted instances
         seg_refinement : bool, default=False
@@ -616,6 +654,11 @@ class SimpleGinjinnPredictor:
             CPU or CUDA device for refinement with CascadePSP
         refinement_method : str, default="full"
             If set to "fast", the local refinement step will be skipped.
+
+        Returns
+        -------
+        Tuple[np.ndarray, np.ndarray, Optional[np.ndarray], np.ndarray]
+            Tuple of (classes, boxes, masks, scores)
         """
         self.d2_cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold
         self.d2_cfg.MODEL.RETINANET.SCORE_THRESH_TEST = threshold
