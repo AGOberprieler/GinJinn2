@@ -27,13 +27,14 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
 1. Download the data:
    
-   The dataset in COCO format is available from GFBio at `not yet available <#>`_.
+   The dataset in COCO format is available from GFBio at `https://doi.org/10.34656/k53b-9c27.1 <https://doi.org/10.34656/k53b-9c27.1>`_.
    
-   Download from the commandline:
+   Download and unzip from the commandline:
 
    .. code-block:: BASH
 
-        wget DOWNLOAD_LINK
+        wget https://data.bgbm.org/dataset/gfbio/0035/gfbio0035.zip
+        unzip gfbio0035.zip
 
 2. Flatten the COCO dataset:
    
@@ -207,14 +208,14 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
 1. Download the data:
    
-   The dataset in COCO format is available from GFBio at `not yet available <#>`_.
+   The dataset in COCO format is available from GFBio at `https://doi.org/10.34656/41pk-rn18.1 <https://doi.org/10.34656/41pk-rn18.1>`_.
    
    Download and unzip from the commandline:
 
    .. code-block:: BASH
 
-        wget DOWNLOAD_LINK
-        unzip DATASET.zip
+        wget https://data.bgbm.org/dataset/gfbio/0036/gfbio0036.zip
+        unzip gfbio0036.zip
 
 2. Flatten the COCO dataset:
 
@@ -406,14 +407,14 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
 1. Download the data:
    
-   The dataset in COCO format is available from GFBio at `not yet available <#>`_.
+   The dataset in COCO format is available from GFBio at `https://doi.org/10.34656/skvz-cs62.1 <https://doi.org/10.34656/skvz-cs62.1>`_.
    
    Download and unzip from the commandline:
 
    .. code-block:: BASH
 
-        wget DOWNLOAD_LINK
-        unzip DATASET_PATH
+        wget https://data.bgbm.org/dataset/gfbio/0034/gfbio0034.zip
+        unzip gfbio0034.zip
 
 2. Flatten the COCO dataset:
    
