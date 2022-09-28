@@ -34,20 +34,12 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
    .. code-block:: BASH
 
         wget https://data.bgbm.org/dataset/gfbio/0035/gfbio0035.zip
-        unzip gfbio0035.zip
-
-2. Flatten the COCO dataset:
+        mkdir seeds_raw
+        unzip gfbio0035.zip -d seeds_raw
    
-   GinJinn2 expects all images to be placed directly in the folder :code:`images` within the dataset folder, being sibling of the annotations (:code:`annotations.json` for COCO or :code:`annotations` folder for Pascal-VOC).
-   To transform any valid COCO dataset into a flat COCO dataset, GinJinn2 provides the :code:`ginjinn utils flatten` command.
+   The extracted files are now located in the "seeds_raw" directory. This is already a GinJinn2-compatible COCO dataset comprising an :code:`images` directory being sibling to an :code:`annotations.json` file.
 
-   Flatten the seeds dataset:
-
-   .. code-block:: BASH
-
-        ginjinn utils flatten -i PATH_TO_SEEDS_DS/images -a PATH_TO_SEEDS_DS/annotations.json -o seeds_flat
-
-3. Train-Validation-Test split:
+2. Train-Validation-Test split:
 
    It is a good practice in Machine Learning (ML) to split the available labeled data into sub-datasets for training, validation, and testing.
    This enables to assess the performance of a trained ML model on unseen data.
@@ -59,7 +51,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
    .. code-block:: BASH
 
-        ginjinn split -I seeds_flat -o seeds_split -d bbox-detection -t 0.2 -v 0.2
+        ginjinn split -I seeds_raw -o seeds_split -d bbox-detection -t 0.2 -v 0.2
 
 Now the dataset is ready to be used for model training.
 
@@ -215,7 +207,10 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
    .. code-block:: BASH
 
         wget https://data.bgbm.org/dataset/gfbio/0036/gfbio0036.zip
-        unzip gfbio0036.zip
+        mkdir stickytraps_raw
+        unzip gfbio0036.zip -d stickytraps_raw
+   
+   The extracted files are now located in the "stickytraps_raw" directory.
 
 2. Flatten the COCO dataset:
 
@@ -223,7 +218,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
    .. code-block:: BASH
 
-        ginjinn utils flatten -i PATH_TO_DATASET/images -a PATH_TO_DATASET/annotations.json -o stickytraps_flat
+        ginjinn utils flatten -i stickytraps_raw/images -a stickytraps_raw/annotations.json -o stickytraps_flat
 
 3. Train-Validation-Test split:
 
@@ -414,20 +409,58 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
    .. code-block:: BASH
 
         wget https://data.bgbm.org/dataset/gfbio/0034/gfbio0034.zip
-        unzip gfbio0034.zip
+        mkdir leucanthemum_raw
+        unzip gfbio0034.zip -d leucanthemum_raw
+    
+   The extracted files are now located in the "leucanthemum_raw" directory.
 
 2. Flatten the COCO dataset:
    
-   GinJinn2 expects all images to be placed directly in the folder :code:`images` within the dataset folder an as a sibling of the annotations (:code:`annotations.json` for COCO or :code:`annotaitons` folder for Pascal-VOC).
+   GinJinn2 expects all images to be placed directly in the folder :code:`images` within the dataset folder an as a sibling of the annotations (:code:`annotations.json` for COCO or :code:`annotations` folder for Pascal-VOC).
    To transform any valid COCO dataset into a flat COCO dataset, GinJinn2 provides the :code:`ginjinn utils flatten` command.
 
    To flatten the *Leucanthemum* dataset:
 
    .. code-block:: BASH
 
-        ginjinn utils flatten -i DATASET_PATH/images -a DATASET_PATH/annotations.json -o leucanthemum_flat
+        ginjinn utils flatten -i leucanthemum_raw/images -a leucanthemum_raw/annotations.json -o leucanthemum_flat
 
-3. Train-Validation-Test split:
+3. Further cleaning:
+    
+   Before proceeding with the analysis, let's have a look into the flattened dataset with :code:`ginjinn info -I leucanthemum_flat`:
+
+   .. code-block:: none
+
+        # images: 303
+
+        category distribution:
+                   #seg  #bbox  total
+        leaf        915      0    915
+        main_vein     0      0      0
+        total       915      0    915
+
+        WARNING: Found categories without annotation
+                - "main_vein"
+
+   The annotation file specifies two object categories "leaf" and "main_vein" comprising 915 and 0 objects, respectively.
+   Since we are only interested in leaves and there are no annotations for "main_vein", we will discard the latter object category:
+
+   .. code-block:: BASH
+    
+        ginjinn utils filter_cat -o leucanthemum_filtered -a leucanthemum_flat/annotations.json -i leucanthemum_flat/images -f leaf
+    
+   :code:`ginjinn info -I leucanthemum_filtered` now yields
+
+   .. code-block:: none
+
+        # images: 295
+
+        category distribution:
+               #seg  #bbox  total
+        leaf    915      0    915
+        total   915      0    915
+
+4. Train-Validation-Test split:
 
    It is a good practice in Machine Learning (ML) to split the dataset into sub-datasets for training, validation, and testing.
    This is necessary to be able to assess the performance of a trained ML on unseen data.
@@ -439,7 +472,7 @@ First the dataset must be downloaded and prepared to be used as an input for Gin
 
    .. code-block:: BASH
 
-        ginjinn split -I leucanthemum_flat -o leucanthemum_split -d instance-segmentation -t 0.2 -v 0.2
+        ginjinn split -I leucanthemum_filtered -o leucanthemum_split -d instance-segmentation -t 0.2 -v 0.2
 
 Bounding Box Model
 ^^^^^^^^^^^^^^^^^^
