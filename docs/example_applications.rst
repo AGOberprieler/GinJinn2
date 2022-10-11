@@ -715,7 +715,7 @@ Finally, we can use the cropped bounding boxes as input for the Seg. Model.
 
 .. code-block:: BASH
     
-    ginjinn predict leucanthemum_seg -i new_data_sw_pred_merged/images_cropped -o new_data_seg_pred -v -c -r
+    ginjinn predict leucanthemum_seg -i new_data_sw_pred_merged/images_cropped/images -o new_data_seg_pred -v -c -r
 
 The predicted leaf masks (:code:`new_data_seg_pred/masks_cropped`) can, for example, be used to quantify the leaf shape using geometric morphometrics.
 
