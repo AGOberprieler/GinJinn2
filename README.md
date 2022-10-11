@@ -31,6 +31,11 @@ Once Conda ist installed run the following command to install GinJinn2 (insert y
 conda install -c agoberprieler -c pytorch -c conda-forge cudatoolkit=10.1 ginjinn2
 ```
 
+In case the installation takes too long or gets stuck, we recommend using the mamba solver, which can be installed via `conda install -n base conda-libmamba-solver`:
+```bash
+conda install -c agoberprieler -c pytorch -c conda-forge cudatoolkit=10.1 ginjinn2 --experimental-solver=libmamba
+```
+
 Test your installation using:
 ```bash
 ginjinn -h
