@@ -13,6 +13,7 @@ requirements:
     - torchvision==0.8.0
     - cudatoolkit=9.2
     - pip
+    - pytest
 
   run:
     - python {{ python }}
@@ -27,6 +28,11 @@ requirements:
     - imantics
     - scikit-learn
     - tqdm
+    - matplotlib
+    - numpy
+    - pyyaml
+    - requests
+    - scipy
 
 build:
   string: pt17_cu92_py{{ python | replace(".", "") }}{{ '_nightly' if environ.get('NIGHTLY') else '' }}
