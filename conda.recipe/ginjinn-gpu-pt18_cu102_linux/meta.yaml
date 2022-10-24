@@ -14,6 +14,7 @@ requirements:
     - torchvision==0.9.0
     - cudatoolkit=10.2
     - pip
+    - pytest
 
   run:
     - python {{ python }}
@@ -28,6 +29,11 @@ requirements:
     - imantics
     - scikit-learn
     - tqdm
+    - matplotlib
+    - numpy
+    - pyyaml
+    - requests
+    - scipy
 
 build:
   string: pt18_cu102_py{{ python | replace(".", "") }}{{ '_nightly' if environ.get('NIGHTLY') else '' }}
@@ -41,3 +47,4 @@ about:
   home: https://github.com/AGOberprieler/GinJinn2
   license: Apache-2.0
   summary: An object detection framework for biologists.
+
