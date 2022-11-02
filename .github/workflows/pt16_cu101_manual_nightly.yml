@@ -1,16 +1,16 @@
 name: Manual Nightly Build pytorch1.6 cuda10.1
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log level'     
+        description: "Log level"
         required: true
-        default: 'warning'
+        default: "warning"
       tags:
-        description: 'Test pytorch1.6 cuda10.1 build'
+        description: "Test pytorch1.6 cuda10.1 build"
   workflow_run:
-    workflows: ['Trigger Nightly Builds']
+    workflows: ["Trigger Nightly Builds"]
     types:
       - completed
 jobs:
@@ -45,7 +45,7 @@ jobs:
           conda config --set anaconda_upload yes
           conda mambabuild conda.recipe/${{ matrix.ginjinn-distribution }} --token ${{ secrets.ANACONDA_TOKEN }} --user AGOberprieler --variants "{'python': ['${{ matrix.python-version }}']}" --label nightly
       - name: Install GinJinn from Anaconda cloud
-        run: conda install -c conda-forge -c pytorch -c agoberprieler/label/nightly ginjinn2 pytorch=1.6.0 cudatoolkit=10.1 --experimental-solver=libmamba
+        run: conda install -c conda-forge -c pytorch -c agoberprieler/label/nightly ginjinn2 pytorch=1.6.0 cudatoolkit=10.1
       - name: Test with pytest
         run: |
           pytest --cov=./ginjinn/ --cov-report=xml

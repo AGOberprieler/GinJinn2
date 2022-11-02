@@ -1,21 +1,21 @@
 name: Trigger Nightly Builds
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log level'     
+        description: "Log level"
         required: true
-        default: 'warning'
+        default: "warning"
       tags:
-        description: 'Trigger Nightly Builds'
+        description: "Trigger Nightly Builds"
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Release artifact
-      run: echo "Builds Triggered"
+      - name: Release artifact
+        run: echo "Builds Triggered"

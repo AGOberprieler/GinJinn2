@@ -1,16 +1,16 @@
 name: Manual Build pytorch1.5 cuda10.1
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log level'     
+        description: "Log level"
         required: true
-        default: 'warning'
+        default: "warning"
       tags:
-        description: 'Test pytorch1.5 cuda10.1 build'
+        description: "Test pytorch1.5 cuda10.1 build"
   workflow_run:
-    workflows: ['Trigger Builds']
+    workflows: ["Trigger Builds"]
     types:
       - completed
 jobs:

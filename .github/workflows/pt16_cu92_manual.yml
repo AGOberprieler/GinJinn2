@@ -1,16 +1,16 @@
 name: Manual Build pytorch1.6 cuda9.2
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log level'     
+        description: "Log level"
         required: true
-        default: 'warning'
+        default: "warning"
       tags:
-        description: 'Test pytorch1.7 cuda9.2 build'
+        description: "Test pytorch1.7 cuda9.2 build"
   workflow_run:
-    workflows: ['Trigger Builds']
+    workflows: ["Trigger Builds"]
     types:
       - completed
 jobs:
@@ -44,7 +44,7 @@ jobs:
           conda config --set anaconda_upload yes
           conda mambabuild conda.recipe/${{ matrix.ginjinn-distribution }} --token ${{ secrets.ANACONDA_TOKEN }} --user AGOberprieler --variants "{'python': ['${{ matrix.python-version }}']}"
       - name: Install GinJinn from Anaconda cloud
-        run: conda install -c conda-forge -c pytorch -c agoberprieler ginjinn2 pytorch=1.6.0 cudatoolkit=9.2 --experimental-solver=libmamba
+        run: conda install -c conda-forge -c pytorch -c agoberprieler ginjinn2 pytorch=1.6.0 cudatoolkit=9.2
       - name: Test with pytest
         run: |
           pytest --cov=./ginjinn/ --cov-report=xml

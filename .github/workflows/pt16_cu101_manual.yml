@@ -1,16 +1,16 @@
 name: Manual Build pytorch1.6 cuda10.1
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log level'     
+        description: "Log level"
         required: true
-        default: 'warning'
+        default: "warning"
       tags:
-        description: 'Test pytorch1.6 cuda10.1 build'
+        description: "Test pytorch1.6 cuda10.1 build"
   workflow_run:
-    workflows: ['Trigger Builds']
+    workflows: ["Trigger Builds"]
     types:
       - completed
 jobs:
@@ -47,7 +47,7 @@ jobs:
         run: |
           conda create -n gj
           conda activate gj
-          conda install -c conda-forge -c pytorch -c agoberprieler ginjinn2 pytorch=1.6.0 cudatoolkit=10.1 --experimental-solver=libmamba
+          conda install -c conda-forge -c pytorch -c agoberprieler ginjinn2 pytorch=1.6.0 cudatoolkit=10.1
       - name: Test with pytest
         run: |
           pytest --cov=./ginjinn/ --cov-report=xml
