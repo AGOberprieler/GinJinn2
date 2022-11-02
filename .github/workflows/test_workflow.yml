@@ -34,12 +34,8 @@ jobs:
           conda-channels: anaconda, conda-forge, pytorch
       - run: conda --version
       - run: which python
-      - name: Install dependencies
-        run: |
-          conda install pytest conda-libmamba-solver anaconda-client pip pytest-cov
-          conda install boa -c conda-forge
       - name: Install GinJinn from Anaconda cloud
         run: |
-          conda create -n gj
+          conda create -n gj conda-libmamba-solver
           source activate gj
           conda install -c conda-forge -c pytorch -c agoberprieler ginjinn2 pytorch=1.6.0 cudatoolkit=10.1 --experimental-solver=libmamba
