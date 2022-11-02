@@ -1,4 +1,4 @@
-name: Manual Build pytorch1.6 cuda10.1
+name: Test Workflow
 
 on:
   workflow_dispatch:
