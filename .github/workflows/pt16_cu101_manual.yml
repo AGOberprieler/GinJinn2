@@ -44,10 +44,7 @@ jobs:
           conda config --set anaconda_upload yes
           conda mambabuild conda.recipe/${{ matrix.ginjinn-distribution }} --token ${{ secrets.ANACONDA_TOKEN }} --user AGOberprieler --variants "{'python': ['${{ matrix.python-version }}']}"
       - name: Install GinJinn from Anaconda cloud
-        run: |
-          conda create -n gj
-          conda activate gj
-          conda install -c conda-forge -c pytorch -c agoberprieler ginjinn2 pytorch=1.6.0 cudatoolkit=10.1
+        run: conda install -c conda-forge -c pytorch -c agoberprieler ginjinn2 pytorch=1.6.0 cudatoolkit=10.1
       - name: Test with pytest
         run: |
           pytest --cov=./ginjinn/ --cov-report=xml
