@@ -18,7 +18,7 @@ requirements:
 
   run:
     - python {{ python }}
-    - pytorch==1.8.0
+    - pytorch==1.10.0
     - torchvision==0.9.0
     - cudatoolkit=11.1
     - opencv
@@ -36,7 +36,7 @@ requirements:
     - scipy
 
 build:
-  string: pt18_cu111_py{{ python | replace(".", "") }}{{ '_nightly' if environ.get('NIGHTLY') else '' }}
+  string: pt110_cu111_py{{ python | replace(".", "") }}{{ '_nightly' if environ.get('NIGHTLY') else '' }}
   skip: true # [not linux]
 entry_points:
    - ginjinn = ginjinn.commandline.main:main
