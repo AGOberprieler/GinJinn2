@@ -1,4 +1,4 @@
-name: Manual Build pytorch1.5 cuda10.1
+name: Manual Build pytorch1.8 cuda11.1
 
 on:
   workflow_dispatch:
@@ -8,11 +8,8 @@ on:
         required: true
         default: "warning"
       tags:
-        description: "Test pytorch1.5 cuda10.1 build"
-  workflow_run:
-    workflows: ["Trigger Builds"]
-    types:
-      - completed
+        description: "Test pytorch1.8 cuda11.1 build"
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -20,7 +17,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: [3.7, 3.8]
-        ginjinn-distribution: [ginjinn-gpu-pt15_cu101_linux]
+        ginjinn-distribution: [ginjinn-gpu-pt110_cu111_linux]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
@@ -44,7 +41,7 @@ jobs:
           conda config --set anaconda_upload yes
           conda mambabuild conda.recipe/${{ matrix.ginjinn-distribution }} --token ${{ secrets.ANACONDA_TOKEN }} --user AGOberprieler --variants "{'python': ['${{ matrix.python-version }}']}"
       - name: Install GinJinn from Anaconda cloud
-        run: conda install -c conda-forge -c pytorch -c agoberprieler ginjinn2 pytorch=1.5.0 cudatoolkit=10.1
+        run: conda install -c conda-forge -c pytorch -c agoberprieler ginjinn2 pytorch=1.10.0 cudatoolkit=11.1
       - name: Test with pytest
         run: |
           pytest --cov=./ginjinn/ --cov-report=xml
