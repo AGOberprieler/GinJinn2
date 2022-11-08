@@ -1,4 +1,4 @@
-name: Manual Build pytorch1.8 cuda11.1
+name: Manual Build pytorch1.10 cuda11.1
 
 on:
   workflow_dispatch:
