@@ -389,7 +389,7 @@ class GinjinnPredictor:
                 self._update_coco(
                     "annotations_cropped",
                     image_cropped,
-                    "img_{}_{}.jpg".format(img_id, i_inst + 1),
+                    "{}_{}.jpg".format(os.path.splitext(img_name)[0], i_inst + 1),
                     len(self._coco_images["annotations_cropped"]) + 1,
                     np.expand_dims(box, axis=0),
                     np.expand_dims(scores[i_inst], axis=0),
