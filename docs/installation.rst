@@ -42,7 +42,7 @@ Inside the activated environment, run the following command to install GinJinn2 
 
     mamba install -c agoberprieler -c pytorch cudatoolkit=10.1 ginjinn2
     
-(Note: When using ``conda`` from Miniconda, you also have to specify the conda-forge channel via ``-c conda-forge``.
+(Note: When using ``conda`` from Miniconda, you also have to specify the conda-forge channel via ``-c conda-forge``.)
 
 Finally, test your installation:
 
