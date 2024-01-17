@@ -17,29 +17,43 @@ See our Read the Docs [Documentation](https://ginjinn2.readthedocs.io/en/latest/
 - NVidia GPU compatible with CUDA toolkit version >= 9.2 (compute capability >= 3; see https://developer.nvidia.com/cuda-gpus)
 - NVidia GPU driver installed (https://www.nvidia.com/en-us/drivers/unix/)
 
-### Installation via Conda
-It is recommended to install GinJinn via [Conda](https://docs.conda.io/en/latest/), an open-source package management system for Python and R, which also includes facilities for environment management system. See the [official installation guide](https://conda.io/projects/conda/en/latest/user-guide/install/linux.html) for further information.
+### Installation via Mamba
+It is recommended to install GinJinn2 via [Mamba](https://mamba.readthedocs.io/en/latest/), a more efficient reimplementation of the [Conda](https://conda.io/projects/conda/en/latest/index.html) package management system.
 
-To install Conda, run the following commands in your Linux terminal:
+To install Mamba (Miniforge distribution), run the following commands in your Linux terminal:
 ```bash
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash Miniconda3-latest-Linux-x86_64.sh
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+bash Miniforge3-Linux-x86_64.sh
+mamba init
 ```
 
-Once Conda ist installed run the following command to install GinJinn2 (insert your CUDA version):
+Before installing GinJinn2, we recommend creating a new Conda/Mamba environment to avoid possible version conflicts with existing software.
+Here, we use Python 3.8; other versions may also work.
+The environment to be created is named "gj".
 ```bash
-conda install -c agoberprieler -c pytorch -c conda-forge cudatoolkit=10.1 ginjinn2
+mamba create -n gj python=3.8
 ```
 
-In case the installation takes too long or gets stuck, we recommend using the mamba solver, which can be installed via `conda install -n base conda-libmamba-solver`:
+To activate this environment, run:
+
 ```bash
-conda install -c agoberprieler -c pytorch -c conda-forge cudatoolkit=10.1 ginjinn2 --experimental-solver=libmamba
+mamba activate gj
 ```
 
-Test your installation using:
+Inside the activated environment, run the following command to install GinJinn2 (insert your CUDA version, 10.1 should work for most modern GPUs):
+
+```bash
+mamba install -c agoberprieler -c pytorch cudatoolkit=10.1 ginjinn2
+```
+
+Finally, test your installation:
+
 ```bash
 ginjinn -h
 ```
+
+NOTE: The activation step is usually required each time you start a new (pseudo)terminal session, otherwise GinJinn2 will not be found.
+
 
 ## Usage
 Make sure to activate your Conda environment via `conda activate MY_ENV_NAME` prior to running any ginjinn command.
