@@ -9,7 +9,7 @@ Besides providing a convenient interface to the latter, GinJinn2 offers several 
 
 ## Documentation
 
-See our Read the Docs [Documentation](https://ginjinn2.readthedocs.io/en/latest/).
+Our comprehensive documentation including various usage examples can be found at https://ginjinn2.readthedocs.io/en/latest/.
 
 ## Installation
 ### Requirements
@@ -20,7 +20,7 @@ See our Read the Docs [Documentation](https://ginjinn2.readthedocs.io/en/latest/
 ### Installation via Mamba
 It is recommended to install GinJinn2 via [Mamba](https://mamba.readthedocs.io/en/latest/), a more efficient reimplementation of the [Conda](https://conda.io/projects/conda/en/latest/index.html) package management system.
 
-To install Mamba (Miniforge distribution), run the following commands in your Linux terminal:
+To install Mamba ([Miniforge](https://github.com/conda-forge/miniforge) distribution), run the following commands in your Linux terminal:
 ```bash
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 bash Miniforge3-Linux-x86_64.sh
@@ -52,8 +52,6 @@ Finally, test your installation:
 ginjinn -h
 ```
 
-NOTE: The activation step is usually required each time you start a new (pseudo)terminal session, otherwise GinJinn2 will not be found.
-
 
 ## Usage
 Make sure to activate your Conda environment via `conda activate MY_ENV_NAME` prior to running any ginjinn command.
@@ -66,6 +64,7 @@ Make sure to activate your Conda environment via `conda activate MY_ENV_NAME` pr
 - `ginjinn utils crop -h` (get usage information for the cropping utility)
 
 The help pages briefly describe basic functionality and command-specific arguments.
+For further explanation, see [Getting Started](https://ginjinn2.readthedocs.io/en/latest/getting_started.html) and [Toolbox](https://ginjinn2.readthedocs.io/en/latest/toolbox.html).
 
 
 ### Dataset formats
@@ -158,7 +157,7 @@ In addition to the dataset for training the model, it is advisable to provide a 
     This command uses a trained model to predict objects for new, unlabeled images. It provides several optional types of output: a COCO annotation file, object visualization on the original images, and cropped images (segmentation masks) for each predicted object.
 
 
-Concrete workflows including more complex examples are described in XYZ.
+Concrete workflows including more complex examples are described at [Getting Started](https://ginjinn2.readthedocs.io/en/latest/getting_started.html) and [Example Applications](https://ginjinn2.readthedocs.io/en/latest/example_applications.html).
 
 ## License
 
