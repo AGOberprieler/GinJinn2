@@ -134,9 +134,9 @@ def generate_simple_shapes_coco( #pylint: disable=too-many-arguments,too-many-lo
             ))
 
         # add noise
-        img = skimage.filters.gaussian(img, sigma=1, multichannel=True)
+        img = skimage.filters.gaussian(img, sigma=1, channel_axis=2)
         img = skimage.util.random_noise(img, var=noise)
-        img = skimage.filters.gaussian(img, sigma=0.25, multichannel=True)
+        img = skimage.filters.gaussian(img, sigma=0.25, channel_axis=2)
         img *= 255
         img = img.astype(np.uint8)
         skimage.io.imsave(file_name, img)
@@ -271,9 +271,9 @@ def generate_simple_shapes_pvoc( #pylint: disable=too-many-arguments,too-many-lo
         ))
 
         # add noise
-        img = skimage.filters.gaussian(img, sigma=1, multichannel=True)
+        img = skimage.filters.gaussian(img, sigma=1, channel_axis=2)
         img = skimage.util.random_noise(img, var=noise)
-        img = skimage.filters.gaussian(img, sigma=0.25, multichannel=True)
+        img = skimage.filters.gaussian(img, sigma=0.25, channel_axis=2)
         img *= 255
         img = img.astype(np.uint8)
         skimage.io.imsave(file_name, img)
