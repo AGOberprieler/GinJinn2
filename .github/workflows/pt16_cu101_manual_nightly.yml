@@ -51,7 +51,9 @@ jobs:
           conda mambabuild conda.recipe/${{ matrix.ginjinn-distribution }} --token ${{ secrets.ANACONDA_TOKEN }} --user AGOberprieler --variants "{'python': ['${{ matrix.python-version }}']}" --label nightly
       - name: Install GinJinn2 from Anaconda cloud
         run: mamba install -c agoberprieler/label/nightly ginjinn2 pytorch=1.6.0 cudatoolkit=10.1
-      - run: mamba list
+      - run: |
+          mamba install libgcc
+          mamba list
       - name: Test with pytest
         run: |
           pytest --cov=./ginjinn/ --cov-report=xml
